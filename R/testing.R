@@ -6,9 +6,9 @@ p <- 100
 bat <- as.factor(c(rep("a", n/2), rep("b", n/2)))
 
 q <- 2
-mod <- matrix(rnorm(n*q), n, q)
+covar <- matrix(rnorm(n*q), n, q)
 
-dat <- matrix(rnorm(n*p), n, p)
+data <- matrix(rnorm(n*p), n, p)
 
 # original ComBat jank
 dat <- t(dat)
@@ -99,25 +99,57 @@ new.stand.mean - stand.mean
 var.pooled - ((dat-t(design%*%B.hat))^2)%*%rep(1/n.array,n.array)
 
 
-# combat.fam
+##### ComBat Family vs OG ComBat ####
 n <- 20
 p <- 100
 bat <- as.factor(c(rep("a", n/2), rep("b", n/2)))
-
 q <- 2
 covar <- matrix(rnorm(n*q), n, q)
 colnames(covar) <- paste0("x", 1:q)
+data <- data.frame(matrix(rnorm(n*p), n, p))
 
-data <- matrix(rnorm(n*p), n, p)
+cf <- combat.fam(data, covar, bat, lm, formula = y ~ x1 + x2)
 
-cf <- combat.fam(data, covar, bat, lm, y ~ x1 + x2)
+library(neuroCombat)
+c <- neuroCombat(t(data), bat, covar, eb = TRUE)
 
-library(matrixStats)
-c <- combat(t(data), batch, covar, eb = FALSE)
-
-cf$estimates$stand.mean - t(c$stand.mean)
-sqrt(cf$estimates$var.pooled) - c$stand.sd
-cf$estimates$gamma.hat - c$gamma.hat
-cf$estimates$delta.hat - c$delta.hat
+cf$estimates$stand.mean - t(c$estimates$stand.mean)
+cf$estimates$gamma.hat - c$estimates$gamma.hat
+cf$estimates$delta.hat - c$estimates$delta.hat
 
 cf$dat.combat - t(c$dat.combat)
+
+
+##### ComBat Family GAMLSS ####
+n <- 20
+p <- 100
+bat <- as.factor(c(rep("a", n/2), rep("b", n/2)))
+q <- 2
+covar <- matrix(rnorm(n*q), n, q)
+colnames(covar) <- paste0("x", 1:q)
+data <- data.frame(matrix(rnorm(n*p), n, p))
+
+library(gamlss)
+cf <- combat.fam(data, covar, bat, gamlss, y ~ x1 + x2,
+                 sigma.formula = ~ x1 + x2)
+
+
+
+##### ComBat Family Longitudinal? ####
+library(lme4)
+
+n <- 20
+p <- 100
+r <- 2 # repeats
+bat <- as.factor(rep(c(rep("a", n/2), rep("b", n/2)), r))
+q <- 2
+covar <- matrix(rnorm(n*r*q), n*r, q)
+colnames(covar) <- paste0("x", 1:q)
+covar <- cbind(covar, ID = rep(1:n, r))
+data <- data.frame(matrix(rnorm(n*r*p), n*r, p))
+
+cf <- combat.fam(data, covar, bat, lmer, y ~ x1 + x2 + (1 | ID))
+
+# technically works but prob not correct
+
+

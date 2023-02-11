@@ -8,6 +8,7 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
 
   bat <- droplevels(bat)
   batch <- model.matrix(~ -1 + bat)
+  batches <- lapply(levels(bat), function(x) which(bat == x))
 
   # Specify robust location/scale estimators
   if (robust.LS) {
@@ -24,7 +25,7 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
 
     # include batch in formula to target pooled mean/variance
     bat_formula <- update(formula, ~ . + batch + -1)
-    do.call(model, list(bat_formula, data = dat, ...))
+    do.call(model, list(formula = bat_formula, data = dat, ...))
   })
 
   #### Standardize the data ####
@@ -34,11 +35,17 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
   pmod <- mod
   pmod$batch[] <- 1/nlevels(bat)
 
-  stand_mean <- sapply(fits, predict, pmod)
-  resid_mean <- sapply(fits, predict, mod)
+  stand_mean <- sapply(fits, predict, newdata = pmod)
+  resid_mean <- sapply(fits, predict, newdata = mod)
 
   var_pooled <- apply(data-resid_mean, 2, scl)*(n-1)/n
-  sd_mat <- matrix(sqrt(var_pooled), n, p, byrow = TRUE)
+
+  if (hasArg(sigma.formula)) {
+    sd_mat <- sapply(fits, predict, newdata = pmod, what = "sigma")
+  } else {
+    sd_mat <- matrix(sqrt(var_pooled), n, p, byrow = TRUE)
+  }
+
 
   # TODO: Variance modeling via GAMLSS
 
@@ -48,10 +55,66 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
   gamma_hat <- do.call(rbind, by(data_stand, bat, function(x) apply(x, 2, loc)))
   delta_hat <- do.call(rbind, by(data_stand, bat, function(x) apply(x, 2, scl)))
 
-  # TODO: Empirical Bayes adjustments
+  # Empirical Bayes adjustments
   if (eb) {
-    gamma_star <- gamma_hat
-    delta_star <- delta_hat
+    gamma_star <- NULL
+    delta_star <- NULL
+
+    for (i in 1:nlevels(bat)) {
+      # method of moments estimates
+      g_bar <- mean(gamma_hat[i,])
+      g_var <- var(gamma_hat[i,])
+
+      d_bar <- mean(delta_hat[i,])
+      d_var <- var(delta_hat[i,])
+
+      d_a <- (2 * d_var + d_bar^2)/d_var
+      d_b <- (d_bar * d_var + d_bar^3)/d_var
+
+      # adjust within batch
+      bdat <- data_stand[batches[[i]],]
+      g_old  <- gamma_hat[i,]
+      d_old  <- delta_hat[i,]
+      change_old <- 1
+      change <- 1
+      count  <- 0
+      while(change > 10e-5){
+        g_new <- (n*g_var*gamma_hat[i,] + d_old*g_bar)/(n*g_var + d_old)
+
+        if (robust.LS) {
+          sum2 <- (n-1) * sapply(1:n, function(j) {
+            .biweight_midvar(bdat[j,], g_new[j])
+            # .mad_var(sdat[i,], g.new[i])
+          })
+        } else {
+          sum2   <- rowSums(sweep(bdat, 2, g_new)^2)
+        }
+
+        d_new <- (sum2/2 + d_b)/(n/2 + d_a - 1)
+
+        change <- max(abs(g_new - g_old)/g_old, abs(d_new - d_old)/d_old)
+
+        if (count > 30) {
+          if (change > change_old) {
+            warning("Empirical Bayes step failed to converge after 30 iterations,
+    	            using estimate before change between iterations increases.")
+            break
+          }
+        }
+
+        g_old <- g_new
+        d_old <- d_new
+
+        change_old <- change
+        count <- count+1
+      }
+
+      gamma_star <- rbind(gamma_star, g_new)
+      delta_star <- rbind(delta_star, d_new)
+    }
+
+    rownames(gamma_star) <- rownames(gamma_hat)
+    rownames(delta_star) <- rownames(delta_hat)
   } else {
     gamma_star <- gamma_hat
     delta_star <- delta_hat
@@ -60,8 +123,6 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
   #### Harmonize the data ####
 
   # Remove batch effects
-  batches <- lapply(levels(bat), function(x) which(bat == x))
-
   data_nb <- data_stand
   for (i in 1:nlevels(bat)) {
     data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],], 2,
@@ -75,6 +136,7 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
 
   estimates <-  list(
     stand.mean = stand_mean,
+    stand.sd = sd_mat,
     var.pooled = var_pooled,
     gamma.hat = gamma_hat,
     delta.hat = delta_hat
