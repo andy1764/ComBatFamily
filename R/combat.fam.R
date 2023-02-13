@@ -1,6 +1,33 @@
-
+#' ComBat Family Harmonization
+#' Implementation of the ComBat Family of harmonization methods allowing for
+#' flexible covariate modeling and alternative estimators for site effect
+#' adjustment. Support for modeling of both location and scale via GAMLSS and
+#' longitudinal harmonization via mixed effects models.
+#'
+#' @param data \emph{n x p} data frame or matrix of observations where
+#'   \emph{p} is the number of features and \emph{n} is the number of subjects.
+#' @param covar Data frame or matrix of covariates supplied to `model`
+#' @param bat Factor indicating batch (often equivalent to site or scanner)
+#' @param model Model function. ComBat Family supports any models that take
+#'   arguments `formula` and `data`, but are limited to models fitting with
+#'   identity link (e.g. `family = gaussian(link = "identity")`). This includes
+#'   \link[stats]{lm}, \link[mgcv]{gam}, \link[gamlss]{gamlss},
+#'   \link[quantreg]{rq}, \link[lme4]{lmer}, and more
+#' @param formula Formula for `model`, format is dependent on choice of model.
+#' @param eb If \code{TRUE}, uses ComBat model with empirical Bayes for mean
+#'   and variance harmonization
+#' @param robust.LS If \code{TRUE}, uses robust location and scale estimators
+#'   for error variance and site effect parameters. Currently uses median and
+#'   biweight midvariance
+#' @param debug Whether to output model fits and intermediate data frames
+#' @param ... Additional arguments to `model`
+#'
+#' @return
+#' @export
+#'
+#' @examples
 combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
-                       robust.LS = FALSE, debug = TRUE, ...) {
+                       robust.LS = FALSE, debug = FALSE, ...) {
   # Data details and formatting
   n <- nrow(data)
   p <- ncol(data)
@@ -46,9 +73,6 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
   } else {
     sd_mat <- matrix(sqrt(var_pooled), n, p, byrow = TRUE)
   }
-
-
-  # TODO: Variance modeling via GAMLSS
 
   data_stand <- (data-stand_mean)/sd_mat
 
@@ -151,7 +175,8 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
   if (debug) {
     debug_out <- list(
       fits = fits,
-      dat.standardized = data_stand
+      data.standardized = data_stand,
+      data.resid = data_nb*sd_mat
     )
   }
 
