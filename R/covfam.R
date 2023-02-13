@@ -1,4 +1,5 @@
 #' CovBat Family Harmonization
+#'
 #' Implementation of the CovBat Family of harmonization methods allowing for
 #' removal of multivariate batch effects, flexible covariate modeling and
 #' alternative estimators for site effect adjustment. Support for modeling of

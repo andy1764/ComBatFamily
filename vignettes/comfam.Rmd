@@ -1,0 +1,127 @@
+---
+title: "ComBat Family Overview"
+author: "Andrew Chen"
+date: "`r Sys.Date()`"
+output: 
+  html_vignette:
+    toc: yes
+vignette: >
+  %\VignetteIndexEntry{ComBat Family Overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The ComBat Family extends the original ComBat methodology to enable flexible
+covariate modeling, leveraging efficient R implementations of regression models.
+A method that belongs in the ComBat Family satisfies the following conditions:
+
+1. Modeling of covariate effects in location and scale
+2. Identity link function, data on the support $(-\infty, \infty)$
+3. Batch effects in location and scale of measurements
+4. Empirical Bayes step for borrowing information across features
+
+## Original ComBat
+ComBat Family readily supports the original linear model used in ComBat via
+`model = lm` and using `formula` to specify covariates included in the model.
+
+```{r}
+suppressPackageStartupMessages(
+  library(neuroCombat)
+)
+
+# generate toy dataset
+set.seed(8888)
+n <- 20
+p <- 100
+bat <- as.factor(c(rep("a", n/2), rep("b", n/2)))
+q <- 2
+covar <- matrix(rnorm(n*q), n, q)
+colnames(covar) <- paste0("x", 1:q)
+data <- data.frame(matrix(rnorm(n*p), n, p))
+
+cf <- comfam(data, covar, bat, lm, formula = y ~ x1 + x2)
+c <- neuroCombat(t(data), bat, covar, verbose = FALSE)
+
+max(cf$dat.combat - t(c$dat.combat))
+```
+
+## ComBat-GAM
+ComBat-GAM (Pomponio et al., 2020) was previously only available in Python. 
+ComBat Family enables fitting of a general additive model (GAM) using notation
+consistent with the `gam` function.
+
+```{r}
+suppressPackageStartupMessages(
+  library(mgcv)
+)
+cg <- comfam(data, covar, bat, gam, formula = y ~ s(x1) + x2)
+```
+
+## Longitudinal ComBat
+The ComBat family includes Longitudinal ComBat (Beer et al. 2020), previously implemented [here](https://github.com/jcbeer/longCombat). Currently, `comfam` uses the
+mean squared residual (MSR) estimator for error variance, but the REML estimator will be implemented at a later date.
+
+```{r}
+# devtools::install_github("jcbeer/longCombat")
+suppressPackageStartupMessages({
+  library(longCombat)
+  library(lme4)
+})
+
+# generate toy dataset
+n <- 20
+p <- 10
+r <- 2 # repeats
+bat <- as.factor(rep(c(rep("a", n/2), rep("b", n/2)), r))
+q <- 2
+covar <- matrix(rnorm(n*r*q), n*r, q)
+colnames(covar) <- paste0("x", 1:q)
+covar <- cbind(covar, ID = rep(1:n, r))
+data <- data.frame(matrix(rnorm(n*r*p), n*r, p))
+
+cf <- comfam(data, covar, bat, lmer, y ~ x1 + x2 + (1 | ID))
+c <- longCombat("ID", "x1", "bat", 1:p, "x1 + x2", "(1 | ID)",
+                data = cbind(data, covar, bat), method = "MSR", verbose = FALSE)
+
+max(cf$dat.combat - c$data_combat[,-(1:3)])
+```
+
+## ComBat-GAMLSS
+ComBat Family supports modeling of covariate effects on the scale of
+measurements via GAMLSS, which is still experimental. Further testing is 
+warranted, but ComBat-GAMLSS should be considered in settings with known 
+covariate effects on scale.
+
+```{r}
+suppressPackageStartupMessages(
+  library(gamlss)
+)
+
+n <- 20
+p <- 10
+bat <- as.factor(c(rep("a", n/2), rep("b", n/2)))
+q <- 2
+covar <- matrix(rnorm(n*q), n, q)
+colnames(covar) <- paste0("x", 1:q)
+data <- data.frame(matrix(rnorm(n*p), n, p))
+
+cgl <- comfam(data, covar, bat, gamlss, y ~ x1 + x2,
+              sigma.formula = ~ x1 + x2, 
+              control = gamlss.control(trace = FALSE))
+```
+
+## References
+Beer, J. C., Tustison, N. J., Cook, P. A., Davatzikos, C., Sheline, Y. I., Shinohara, R. T., & Linn, K. A. (2020). Longitudinal ComBat: A method for harmonizing longitudinal multi-scanner imaging data. *NeuroImage*, 220, 117129. https://doi.org/10.1016/j.neuroimage.2020.117129
+
+Johnson, W. E., Li, C., & Rabinovic, A. (2007). Adjusting batch effects in microarray expression data using empirical Bayes methods. *Biostatistics*, 8(1), 118–127. https://doi.org/10.1093/biostatistics/kxj037
+
+Pomponio, R., Erus, G., Habes, M., Doshi, J., Srinivasan, D., Mamourian, E., Bashyam, V., Nasrallah, I. M., Satterthwaite, T. D., Fan, Y., Launer, L. J., Masters, C. L., Maruff, P., Zhuo, C., Völzke, H., Johnson, S. C., Fripp, J., Koutsouleris, N., Wolf, D. H., … Davatzikos, C. (2020). Harmonization of large MRI datasets for the analysis of brain imaging patterns throughout the lifespan. *NeuroImage*, 208, 116450. https://doi.org/10.1016/j.neuroimage.2019.116450
+
+

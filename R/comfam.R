@@ -1,4 +1,5 @@
 #' ComBat Family Harmonization
+#'
 #' Implementation of the ComBat Family of harmonization methods allowing for
 #' flexible covariate modeling and alternative estimators for site effect
 #' adjustment. Support for modeling of both location and scale via GAMLSS and
