@@ -35,11 +35,11 @@
 #' @export
 #'
 #' @examples
-covbat.fam <- function(data, covar, bat, model, formula,
-                       score.model = NULL, score.args = NULL, eb = TRUE,
-                       robust.LS = FALSE, percent.var = 0.95, n.pc = NULL,
-                       std.var = TRUE, debug = FALSE,
-                       ...)
+covfam <- function(data, covar, bat, model, formula,
+                   score.model = NULL, score.args = NULL, eb = TRUE,
+                   robust.LS = FALSE, percent.var = 0.95, n.pc = NULL,
+                   std.var = TRUE, debug = FALSE,
+                   ...)
 {
   # Use ComBat to remove mean/variance effects
   com_out <- combat.fam(data, covar, bat, model, formula, eb,

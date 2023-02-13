@@ -108,7 +108,7 @@ covar <- matrix(rnorm(n*q), n, q)
 colnames(covar) <- paste0("x", 1:q)
 data <- data.frame(matrix(rnorm(n*p), n, p))
 
-cf <- combat.fam(data, covar, bat, lm, formula = y ~ x1 + x2)
+cf <- comfam(data, covar, bat, lm, formula = y ~ x1 + x2)
 
 library(neuroCombat)
 c <- neuroCombat(t(data), bat, covar, eb = TRUE)
@@ -130,7 +130,7 @@ covar <- matrix(rnorm(n*q), n, q)
 colnames(covar) <- paste0("x", 1:q)
 data <- data.frame(matrix(0:1, n, p))
 
-cf <- combat.fam(data, covar, bat, glm, formula = y ~ x1 + x2,
+cf <- comfam(data, covar, bat, glm, formula = y ~ x1 + x2,
                  family = binomial(link = "logit"))
 
 # test
@@ -149,7 +149,7 @@ colnames(covar) <- paste0("x", 1:q)
 data <- data.frame(matrix(rnorm(n*p), n, p))
 
 library(gamlss)
-cf <- combat.fam(data, covar, bat, gamlss, y ~ x1 + x2,
+cf <- comfam(data, covar, bat, gamlss, y ~ x1 + x2,
                  sigma.formula = ~ x1 + x2)
 
 
@@ -167,7 +167,7 @@ colnames(covar) <- paste0("x", 1:q)
 covar <- cbind(covar, ID = rep(1:n, r))
 data <- data.frame(matrix(rnorm(n*r*p), n*r, p))
 
-cf <- combat.fam(data, covar, bat, lmer, y ~ x1 + x2 + (1 | ID),
+cf <- comfam(data, covar, bat, lmer, y ~ x1 + x2 + (1 | ID),
                  control=lme4::lmerControl(optimizer='bobyqa'))
 # technically works but prob not correct
 
@@ -194,7 +194,7 @@ covar <- matrix(rnorm(n*q), n, q)
 colnames(covar) <- paste0("x", 1:q)
 data <- data.frame(matrix(rnorm(n*p), n, p))
 
-cf <- covbat.fam(data, covar, bat, lm, formula = y ~ x1 + x2, debug = TRUE)
+cf <- covfam(data, covar, bat, lm, formula = y ~ x1 + x2, debug = TRUE)
 
 c <- covbat(t(data), bat, covar, eb = TRUE)
 
@@ -216,5 +216,5 @@ covar <- matrix(rnorm(n*q), n, q)
 colnames(covar) <- paste0("x", 1:q)
 data <- data.frame(matrix(rnorm(n*p), n, p))
 
-cf <- covbat.fam(data, covar, bat, lm, formula = y ~ x1 + x2, debug = TRUE,
+cf <- covfam(data, covar, bat, lm, formula = y ~ x1 + x2, debug = TRUE,
                  score.model = lm, score.args = list(formula = y ~ x1 + x2))

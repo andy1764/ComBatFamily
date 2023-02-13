@@ -26,8 +26,8 @@
 #' @export
 #'
 #' @examples
-combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
-                       robust.LS = FALSE, debug = FALSE, ...) {
+comfam <- function(data, covar, bat, model, formula, eb = TRUE,
+                   robust.LS = FALSE, debug = FALSE, ...) {
   # Data details and formatting
   n <- nrow(data)
   p <- ncol(data)
