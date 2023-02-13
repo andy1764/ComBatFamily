@@ -32,9 +32,10 @@ ComBat Family readily supports the original linear model used in ComBat via
 `model = lm` and using `formula` to specify covariates included in the model.
 
 ```{r}
-suppressPackageStartupMessages(
+suppressPackageStartupMessages({
   library(neuroCombat)
-)
+  library(ComBatFamily)
+})
 
 # generate toy dataset
 set.seed(8888)

@@ -5,9 +5,10 @@ knitr::opts_chunk$set(
 )
 
 ## -----------------------------------------------------------------------------
-suppressPackageStartupMessages(
+suppressPackageStartupMessages({
   library(neuroCombat)
-)
+  library(ComBatFamily)
+})
 
 # generate toy dataset
 set.seed(8888)
