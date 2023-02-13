@@ -113,11 +113,13 @@ cf <- combat.fam(data, covar, bat, lm, formula = y ~ x1 + x2)
 library(neuroCombat)
 c <- neuroCombat(t(data), bat, covar, eb = TRUE)
 
-cf$estimates$stand.mean - t(c$estimates$stand.mean)
+cf$estimates$stand.mean - t(c$estimates$stand.mean + c$estimates$mod.mean)
 cf$estimates$gamma.hat - c$estimates$gamma.hat
 cf$estimates$delta.hat - c$estimates$delta.hat
+cf$estimates$gamma.star - c$estimates$gamma.star
+cf$estimates$delta.star - c$estimates$delta.star
 
-cf$dat.combat - t(c$dat.combat)
+max(cf$dat.combat - t(c$dat.combat))
 
 
 ##### ComBat Family GAMLSS ####

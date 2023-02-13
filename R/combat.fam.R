@@ -9,6 +9,7 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
   bat <- droplevels(bat)
   batch <- model.matrix(~ -1 + bat)
   batches <- lapply(levels(bat), function(x) which(bat == x))
+  n_batches <- sapply(batches, length)
 
   # Specify robust location/scale estimators
   if (robust.LS) {
@@ -33,7 +34,7 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
   # Model matrix for obtaining pooled mean
   mod <- data.frame(covar, I(batch))
   pmod <- mod
-  pmod$batch[] <- 1/nlevels(bat)
+  pmod$batch[] <- matrix(n_batches/n, n, nlevels(bat), byrow = TRUE)
 
   stand_mean <- sapply(fits, predict, newdata = pmod)
   resid_mean <- sapply(fits, predict, newdata = mod)
@@ -61,6 +62,8 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
     delta_star <- NULL
 
     for (i in 1:nlevels(bat)) {
+      n_b <- n_batches[i]
+
       # method of moments estimates
       g_bar <- mean(gamma_hat[i,])
       g_var <- var(gamma_hat[i,])
@@ -79,18 +82,18 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
       change <- 1
       count  <- 0
       while(change > 10e-5){
-        g_new <- (n*g_var*gamma_hat[i,] + d_old*g_bar)/(n*g_var + d_old)
+        g_new <- (n_b*g_var*gamma_hat[i,] + d_old*g_bar)/(n_b*g_var + d_old)
 
         if (robust.LS) {
-          sum2 <- (n-1) * sapply(1:n, function(j) {
-            .biweight_midvar(bdat[j,], g_new[j])
+          sum2 <- (n_b-1) * sapply(1:p, function(v) {
+            .biweight_midvar(bdat[,v], g_new[v])
             # .mad_var(sdat[i,], g.new[i])
           })
         } else {
-          sum2   <- rowSums(sweep(bdat, 2, g_new)^2)
+          sum2   <- colSums(sweep(bdat, 2, g_new)^2)
         }
 
-        d_new <- (sum2/2 + d_b)/(n/2 + d_a - 1)
+        d_new <- (sum2/2 + d_b)/(n_b/2 + d_a - 1)
 
         change <- max(abs(g_new - g_old)/g_old, abs(d_new - d_old)/d_old)
 
@@ -139,7 +142,9 @@ combat.fam <- function(data, covar, bat, model, formula, eb = TRUE,
     stand.sd = sd_mat,
     var.pooled = var_pooled,
     gamma.hat = gamma_hat,
-    delta.hat = delta_hat
+    delta.hat = delta_hat,
+    gamma.star = gamma_star,
+    delta.star = delta_star
   )
 
   debug_out <- NULL
