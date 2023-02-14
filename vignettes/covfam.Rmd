@@ -1,0 +1,90 @@
+---
+title: "ComBat Family Overview"
+author: "Andrew Chen"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: yes
+vignette: >
+  %\VignetteIndexEntry{ComBat Family Overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The CovBat Family extends the original CovBat methodology to enable flexible
+covariate modeling, leveraging efficient R implementations of regression models.
+A method that belongs in the CovBat Family satisfies the following conditions:
+
+1. Modeling of covariate effects in location and scale
+2. Real-valued measurements and identity link function
+3. Batch effects in mean and covariance of measurements
+4. Empirical Bayes step for borrowing information across features
+5. Adjustment of multivariate covariate and batch effects through principal 
+components (PCs) of ComBat residuals
+
+## CovBat
+CovBat Family defaults to the original linear model and parameters used in 
+[CovBat](https://github.com/andy1764/CovBat_Harmonization)
+
+```{r}
+suppressPackageStartupMessages({
+  library(CovBat)
+  library(ComBatFamily)
+})
+
+# generate toy dataset
+set.seed(8888)
+n <- 20
+p <- 5
+bat <- as.factor(c(rep("a", n/2), rep("b", n/2)))
+q <- 2
+covar <- matrix(rnorm(n*q), n, q)
+colnames(covar) <- paste0("x", 1:q)
+data <- data.frame(matrix(rnorm(n*p), n, p))
+
+cf <- covfam(data, bat, covar, lm, formula = y ~ x1 + x2)
+c <- covbat(t(data), bat, covar)
+
+max(cf$dat.covbat - t(c$dat.covbat))
+```
+
+```{r}
+# no covariates specified
+cf <- covfam(data, bat)
+c <- covbat(t(data), bat)
+
+max(cf$dat.covbat - t(c$dat.covbat))
+```
+
+## CovBat-GAM
+Modeling covariates via a general additive model (GAM) is part of the CovBat
+family and can be easily implemented.
+
+```{r}
+suppressPackageStartupMessages(
+  library(mgcv)
+)
+cg <- covfam(data, bat, covar, gam, formula = y ~ s(x1) + x2)
+```
+
+## CovBat with Modeling of Scores
+CovBat Family extends the original CovBat method by enabling modeling of
+covariate effects in the principal component (PC) scores. The model is estimated
+separately from the model used in the standardization step.
+
+```{r}
+# no covariates specified
+cf <- covfam(data, bat, covar, formula = y ~ x1 + x2, score.model = lm,
+             score.args = list(formula = y ~ x1 + x2))
+```
+
+## References
+Chen, A. A., Beer, J. C., Tustison, N. J., Cook, P. A., Shinohara, R. T., Shou, H., & Initiative, T. A. D. N. (2022). Mitigating site effects in covariance for machine learning in neuroimaging data. *Human Brain Mapping*, 43(4), 1179–1195. https://doi.org/10.1002/hbm.25688
+

@@ -7,14 +7,15 @@
 #'
 #' @param data \emph{n x p} data frame or matrix of observations where
 #'   \emph{p} is the number of features and \emph{n} is the number of subjects.
-#' @param covar Data frame or matrix of covariates supplied to `model`
 #' @param bat Factor indicating batch (often equivalent to site or scanner)
+#' @param covar Data frame or matrix of covariates supplied to `model`
 #' @param model Model function. ComBat Family supports any models that take
 #'   arguments `formula` and `data`, but are limited to models fitting with
 #'   identity link (e.g. `family = gaussian(link = "identity")`). This includes
 #'   \link[stats]{lm}, \link[mgcv]{gam}, \link[gamlss]{gamlss},
 #'   \link[quantreg]{rq}, \link[lme4]{lmer}, and more
-#' @param formula Formula for `model`, format is dependent on choice of model.
+#' @param formula Formula for `model` starting with `y ~` where `y` represents
+#'   each feature
 #' @param eb If \code{TRUE}, uses ComBat model with empirical Bayes for mean
 #'   and variance harmonization
 #' @param robust.LS If \code{TRUE}, uses robust location and scale estimators
@@ -23,11 +24,15 @@
 #' @param debug Whether to output model fits and intermediate data frames
 #' @param ... Additional arguments to `model`
 #'
-#' @return
+#' @return `comfam` returns a list containing the following components:
+#' \item{dat.combat}{Harmonized data as a matrix with same dimensions as `data`}
+#' \item{estimates}{List of estimates from standardization and batch effect correction}
 #' @export
 #'
 #' @examples
-comfam <- function(data, covar, bat, model, formula, eb = TRUE,
+#' comfam(iris[,1:2], iris$Species)
+#' comfam(iris, iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
+comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL, eb = TRUE,
                    robust.LS = FALSE, debug = FALSE, ...) {
   # Data details and formatting
   n <- nrow(data)
@@ -49,8 +54,18 @@ comfam <- function(data, covar, bat, model, formula, eb = TRUE,
   }
 
   #### Fit specified models ####
+  if (is.null(covar)) {
+    mod <- data.frame(I(batch))
+  } else {
+    mod <- data.frame(covar, I(batch))
+  }
+
+  if (is.null(covar) | is.null(formula)) {
+    formula <- y ~ 1
+  }
+
   fits <- apply(data, 2, function(y) {
-    dat <- data.frame(y = y, covar, I(batch))
+    dat <- data.frame(y = y, mod)
 
     # include batch in formula to target pooled mean/variance
     bat_formula <- update(formula, ~ . + batch + -1)
@@ -60,7 +75,6 @@ comfam <- function(data, covar, bat, model, formula, eb = TRUE,
   #### Standardize the data ####
 
   # Model matrix for obtaining pooled mean
-  mod <- data.frame(covar, I(batch))
   pmod <- mod
   pmod$batch[] <- matrix(n_batches/n, n, nlevels(bat), byrow = TRUE)
 
@@ -172,22 +186,11 @@ comfam <- function(data, covar, bat, model, formula, eb = TRUE,
     delta.star = delta_star
   )
 
-  debug_out <- NULL
+  out <- list(dat.combat = data_combat, estimates = estimates)
   if (debug) {
-    debug_out <- list(
-      fits = fits,
-      data.standardized = data_stand,
-      data.resid = data_nb*sd_mat
-    )
+    out$debug <- list(fits = fits, dat.standardized = data_stand)
   }
-
-  return(
-    list(
-      dat.combat = data_combat,
-      estimates = estimates,
-      debug = debug_out
-    )
-  )
+  out
 }
 
 .biweight_midvar <- function(data, center=NULL, norm.unbiased = TRUE) {

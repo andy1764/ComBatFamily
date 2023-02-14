@@ -154,26 +154,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <div id="TOC">
 <ul>
-<li><a href="#combat">ComBat</a></li>
-<li><a href="#combat-gam">ComBat-GAM</a></li>
-<li><a href="#combat-gamlss">ComBat-GAMLSS</a></li>
-<li><a href="#longitudinal-combat">Longitudinal ComBat</a></li>
+<li><a href="#covbat">CovBat</a></li>
+<li><a href="#covbat-gam">CovBat-GAM</a></li>
+<li><a href="#covbat-with-modeling-of-scores">CovBat with Modeling of Scores</a></li>
 <li><a href="#references">References</a></li>
 </ul>
 </div>
 
-<p>The ComBat Family extends the original ComBat methodology to enable flexible covariate modeling, leveraging efficient R implementations of regression models. A method that belongs in the ComBat Family satisfies the following conditions:</p>
+<p>The CovBat Family extends the original CovBat methodology to enable flexible covariate modeling, leveraging efficient R implementations of regression models. A method that belongs in the CovBat Family satisfies the following conditions:</p>
 <ol style="list-style-type: decimal">
 <li>Modeling of covariate effects in location and scale</li>
 <li>Real-valued measurements and identity link function</li>
-<li>Batch effects in location and scale of measurements</li>
+<li>Batch effects in mean and covariance of measurements</li>
 <li>Empirical Bayes step for borrowing information across features</li>
+<li>Adjustment of multivariate covariate and batch effects through principal components (PCs) of ComBat residuals</li>
 </ol>
-<div id="combat" class="section level2">
-<h2>ComBat</h2>
-<p>ComBat Family defaults to the original linear model used in ComBat, using <code>formula</code> to specify covariates included in the model.</p>
+<div id="covbat" class="section level2">
+<h2>CovBat</h2>
+<p>CovBat Family defaults to the original linear model and parameters used in <a href="https://github.com/andy1764/CovBat_Harmonization">CovBat</a></p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(neuroCombat)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(CovBat)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(ComBatFamily)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>})</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
@@ -187,80 +187,36 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(covar) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;x&quot;</span>, <span class="dv">1</span><span class="sc">:</span>q)</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>p), n, p))</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>cf <span class="ot">&lt;-</span> <span class="fu">comfam</span>(data, bat, covar, lm, <span class="at">formula =</span> y <span class="sc">~</span> x1 <span class="sc">+</span> x2)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">neuroCombat</span>(<span class="fu">t</span>(data), bat, covar, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>cf <span class="ot">&lt;-</span> <span class="fu">covfam</span>(data, bat, covar, lm, <span class="at">formula =</span> y <span class="sc">~</span> x1 <span class="sc">+</span> x2)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">covbat</span>(<span class="fu">t</span>(data), bat, covar)</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(cf<span class="sc">$</span>dat.combat <span class="sc">-</span> <span class="fu">t</span>(c<span class="sc">$</span>dat.combat))</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 8.881784e-16</span></span></code></pre></div>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(cf<span class="sc">$</span>dat.covbat <span class="sc">-</span> <span class="fu">t</span>(c<span class="sc">$</span>dat.covbat))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1.332268e-15</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># no covariates specified</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>cf <span class="ot">&lt;-</span> <span class="fu">comfam</span>(data, bat)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">neuroCombat</span>(<span class="fu">t</span>(data), bat, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>cf <span class="ot">&lt;-</span> <span class="fu">covfam</span>(data, bat)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">covbat</span>(<span class="fu">t</span>(data), bat)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(cf<span class="sc">$</span>dat.combat <span class="sc">-</span> <span class="fu">t</span>(c<span class="sc">$</span>dat.combat))</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 8.881784e-16</span></span></code></pre></div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(cf<span class="sc">$</span>dat.covbat <span class="sc">-</span> <span class="fu">t</span>(c<span class="sc">$</span>dat.covbat))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 3.996803e-15</span></span></code></pre></div>
 </div>
-<div id="combat-gam" class="section level2">
-<h2>ComBat-GAM</h2>
-<p>ComBat-GAM (Pomponio et al., 2020) was previously only available in Python. ComBat Family enables fitting of a general additive model (GAM) using notation consistent with the <code>gam</code> function.</p>
+<div id="covbat-gam" class="section level2">
+<h2>CovBat-GAM</h2>
+<p>Modeling covariates via a general additive model (GAM) is part of the CovBat family and can be easily implemented.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(mgcv)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>cg <span class="ot">&lt;-</span> <span class="fu">comfam</span>(data, bat, covar, gam, <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> x2)</span></code></pre></div>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>cg <span class="ot">&lt;-</span> <span class="fu">covfam</span>(data, bat, covar, gam, <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> x2)</span></code></pre></div>
 </div>
-<div id="combat-gamlss" class="section level2">
-<h2>ComBat-GAMLSS</h2>
-<p>ComBat Family supports modeling of covariate effects on the scale of measurements via GAMLSS, which is still experimental. Testing is ongoing, but ComBat-GAMLSS should be considered in settings with potential covariate effects on scale (e.g. age affecting the variance of imaging features).</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(gamlss)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;gamlss&#39; was built under R version 4.1.2</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;gamlss.dist&#39; was built under R version 4.1.2</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>cgl <span class="ot">&lt;-</span> <span class="fu">comfam</span>(data, bat, covar, gamlss, y <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">sigma.formula =</span> <span class="sc">~</span> x1 <span class="sc">+</span> x2, </span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">control =</span> <span class="fu">gamlss.control</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>))</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in RS(): Algorithm RS has not yet converged</span></span></code></pre></div>
-</div>
-<div id="longitudinal-combat" class="section level2">
-<h2>Longitudinal ComBat</h2>
-<p>The ComBat family includes Longitudinal ComBat (Beer et al. 2020), previously implemented <a href="https://github.com/jcbeer/longCombat">here</a>. Currently, <code>comfam</code> uses the mean squared residual (MSR) estimator for error variance, but the REML estimator will be implemented at a later date.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># devtools::install_github(&quot;jcbeer/longCombat&quot;)</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(longCombat)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(lme4)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># generate toy dataset</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># repeats</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>bat <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">&quot;a&quot;</span>, n<span class="sc">/</span><span class="dv">2</span>), <span class="fu">rep</span>(<span class="st">&quot;b&quot;</span>, n<span class="sc">/</span><span class="dv">2</span>)), r))</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>covar <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>r<span class="sc">*</span>q), n<span class="sc">*</span>r, q)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(covar) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;x&quot;</span>, <span class="dv">1</span><span class="sc">:</span>q)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>covar <span class="ot">&lt;-</span> <span class="fu">cbind</span>(covar, <span class="at">ID =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>n, r))</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>r<span class="sc">*</span>p), n<span class="sc">*</span>r, p))</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>cf <span class="ot">&lt;-</span> <span class="fu">comfam</span>(data, bat, covar, lmer, y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> ID))</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">longCombat</span>(<span class="st">&quot;ID&quot;</span>, <span class="st">&quot;x1&quot;</span>, <span class="st">&quot;bat&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">&quot;x1 + x2&quot;</span>, <span class="st">&quot;(1 | ID)&quot;</span>,</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> <span class="fu">cbind</span>(data, covar, bat), <span class="at">method =</span> <span class="st">&quot;MSR&quot;</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(cf<span class="sc">$</span>dat.combat <span class="sc">-</span> c<span class="sc">$</span>data_combat[,<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)])</span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 4.171635e-09</span></span></code></pre></div>
+<div id="covbat-with-modeling-of-scores" class="section level2">
+<h2>CovBat with Modeling of Scores</h2>
+<p>CovBat Family extends the original CovBat method by enabling modeling of covariate effects in the principal component (PC) scores. The model is estimated separately from the model used in the standardization step.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># no covariates specified</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>cf <span class="ot">&lt;-</span> <span class="fu">covfam</span>(data, bat, covar, <span class="at">formula =</span> y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">score.model =</span> lm,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">score.args =</span> <span class="fu">list</span>(<span class="at">formula =</span> y <span class="sc">~</span> x1 <span class="sc">+</span> x2))</span></code></pre></div>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
-<p>Beer, J. C., Tustison, N. J., Cook, P. A., Davatzikos, C., Sheline, Y. I., Shinohara, R. T., &amp; Linn, K. A. (2020). Longitudinal ComBat: A method for harmonizing longitudinal multi-scanner imaging data. <em>NeuroImage</em>, 220, 117129. <a href="https://doi.org/10.1016/j.neuroimage.2020.117129" class="uri">https://doi.org/10.1016/j.neuroimage.2020.117129</a></p>
-<p>Johnson, W. E., Li, C., &amp; Rabinovic, A. (2007). Adjusting batch effects in microarray expression data using empirical Bayes methods. <em>Biostatistics</em>, 8(1), 118–127. <a href="https://doi.org/10.1093/biostatistics/kxj037" class="uri">https://doi.org/10.1093/biostatistics/kxj037</a></p>
-<p>Pomponio, R., Erus, G., Habes, M., Doshi, J., Srinivasan, D., Mamourian, E., Bashyam, V., Nasrallah, I. M., Satterthwaite, T. D., Fan, Y., Launer, L. J., Masters, C. L., Maruff, P., Zhuo, C., Völzke, H., Johnson, S. C., Fripp, J., Koutsouleris, N., Wolf, D. H., … Davatzikos, C. (2020). Harmonization of large MRI datasets for the analysis of brain imaging patterns throughout the lifespan. <em>NeuroImage</em>, 208, 116450. <a href="https://doi.org/10.1016/j.neuroimage.2019.116450" class="uri">https://doi.org/10.1016/j.neuroimage.2019.116450</a></p>
+<p>Chen, A. A., Beer, J. C., Tustison, N. J., Cook, P. A., Shinohara, R. T., Shou, H., &amp; Initiative, T. A. D. N. (2022). Mitigating site effects in covariance for machine learning in neuroimaging data. <em>Human Brain Mapping</em>, 43(4), 1179–1195. <a href="https://doi.org/10.1002/hbm.25688" class="uri">https://doi.org/10.1002/hbm.25688</a></p>
 </div>
 
 

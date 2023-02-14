@@ -6,10 +6,10 @@
 \usage{
 comfam(
   data,
-  covar,
   bat,
-  model,
-  formula,
+  covar = NULL,
+  model = lm,
+  formula = NULL,
   eb = TRUE,
   robust.LS = FALSE,
   debug = FALSE,
@@ -20,17 +20,18 @@ comfam(
 \item{data}{\emph{n x p} data frame or matrix of observations where
 \emph{p} is the number of features and \emph{n} is the number of subjects.}
 
-\item{covar}{Data frame or matrix of covariates supplied to `model`}
-
 \item{bat}{Factor indicating batch (often equivalent to site or scanner)}
 
+\item{covar}{Data frame or matrix of covariates supplied to \code{model}}
+
 \item{model}{Model function. ComBat Family supports any models that take
-arguments `formula` and `data`, but are limited to models fitting with
-identity link (e.g. `family = gaussian(link = "identity")`). This includes
+arguments \code{formula} and \code{data}, but are limited to models fitting with
+identity link (e.g. \code{family = gaussian(link = "identity")}). This includes
 \link[stats]{lm}, \link[mgcv]{gam}, \link[gamlss]{gamlss},
 \link[quantreg]{rq}, \link[lme4]{lmer}, and more}
 
-\item{formula}{Formula for `model`, format is dependent on choice of model.}
+\item{formula}{Formula for \code{model} starting with \verb{y ~} where \code{y} represents
+each feature}
 
 \item{eb}{If \code{TRUE}, uses ComBat model with empirical Bayes for mean
 and variance harmonization}
@@ -41,11 +42,20 @@ biweight midvariance}
 
 \item{debug}{Whether to output model fits and intermediate data frames}
 
-\item{...}{Additional arguments to `model`}
+\item{...}{Additional arguments to \code{model}}
+}
+\value{
+\code{comfam} returns a list containing the following components:
+\item{dat.combat}{Harmonized data as a matrix with same dimensions as \code{data}}
+\item{estimates}{List of estimates from standardization and batch effect correction}
 }
 \description{
 Implementation of the ComBat Family of harmonization methods allowing for
 flexible covariate modeling and alternative estimators for site effect
 adjustment. Support for modeling of both location and scale via GAMLSS and
 longitudinal harmonization via mixed effects models.
+}
+\examples{
+comfam(iris[,1:2], iris$Species)
+comfam(iris, iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
 }

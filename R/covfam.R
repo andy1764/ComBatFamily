@@ -8,21 +8,22 @@
 #'
 #' @param data \emph{n x p} data frame or matrix of observations where
 #'   \emph{p} is the number of features and \emph{n} is the number of subjects.
-#' @param covar Data frame or matrix of covariates supplied to `model`
 #' @param bat Factor indicating batch (often equivalent to site or scanner)
+#' @param covar Data frame or matrix of covariates supplied to `model`
 #' @param model Model function. ComBat Family supports any models that take
 #'   arguments `formula` and `data`, but are limited to models fitting with
 #'   identity link (e.g. `family = gaussian(link = "identity")`). This includes
 #'   \link[stats]{lm}, \link[mgcv]{gam}, \link[gamlss]{gamlss},
 #'   \link[quantreg]{rq}, \link[lme4]{lmer}, and more
-#' @param formula Formula for `model`, format is dependent on choice of model.
+#' @param formula Formula for `model` starting with `y ~` where `y` represents
+#'   each feature
 #' @param score.model Model for scores, defaults to NULL for fitting basic
 #'   location and scale model without covariates on the scores
-#' @param score.args List of arguments for score model, requires `formula`
+#' @param score.args List of arguments for score model
 #' @param eb If \code{TRUE}, uses ComBat model with empirical Bayes for mean
 #'   and variance harmonization.
 #' @param robust.LS If \code{TRUE}, uses robust location and scale estimators
-#'   for error variance and site effect parameters. Currently uses median and
+#'   for error variance and site effect parameters. Uses median and
 #'   biweight midvariance
 #' @param percent.var Numeric. The number of harmonized principal component
 #'    scores is selected to explain this proportion of the variance.
@@ -32,71 +33,66 @@
 #' @param debug Whether to output model fits and intermediate data frames
 #' @param ... Additional arguments to `model`
 #'
-#' @return
+#' @return `covfam` returns a list containing the following components:
+#' \item{dat.covbat}{Harmonized data as a matrix with same dimensions as `data`}
+#' \item{combat.out}{List output of \link[ComBatFamily]{comfam} from the ComBat step}
 #' @export
 #'
 #' @examples
-covfam <- function(data, covar, bat, model, formula,
+#' covfam(iris[,1:2], iris$Species)
+#' covfam(iris, iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
+covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
                    score.model = NULL, score.args = NULL, eb = TRUE,
                    robust.LS = FALSE, percent.var = 0.95, n.pc = NULL,
                    std.var = TRUE, debug = FALSE,
                    ...)
 {
-  # Use ComBat to remove mean/variance effects
-  com_out <- combat.fam(data, covar, bat, model, formula, eb,
-                        robust.LS, debug = TRUE, ...)
-  x_com <- com_out$debug$data.resid
+  n <- nrow(data)
+  p <- ncol(data)
 
-  # PC on ComBat-adjusted data
-  x_pc <- prcomp(x_com, center = TRUE, scale. = std.var)
+  #### Remove mean/variance effects ####
+  com_out <- comfam(data, bat, covar, model, formula, eb, robust.LS, debug, ...)
+  com_res <- com_out$dat.combat - com_out$estimates$stand.mean
 
-  # Subset scores based on percent of variance explained
+  #### Adjust for multivariate batch effects via PCA ####
+  d_pc <- prcomp(com_res, center = TRUE, scale. = std.var)
+
+  # Only adjust PCs specified via percent.var or npc
   if (!is.null(n.pc)) {
     npc <- n.pc
   } else {
-    npc <- which(cumsum(x_pc$sdev^2/sum(x_pc$sdev^2)) > percent.var)[1]
+    npc <- which(cumsum(d_pc$sdev^2/sum(d_pc$sdev^2)) > percent.var)[1]
   }
-  scores <- x_pc$x[,1:npc]
+  scores <- d_pc$x[,1:npc]
 
   # ComBat without covariates to remove site effect in score mean/variance
   # If score.model specified, fits that model instead
   if (is.null(score.model)) {
-    scores_com <- combat.fam(scores, covar, bat, lm, y ~ 1, eb = FALSE,
-                             robust.LS = FALSE)
+    scores_com <- comfam(scores, bat, eb = FALSE, debug = debug)
   } else {
-    scores_com <- do.call(combat.fam,
-                          c(list(scores, covar, bat, model = score.model,
-                                 eb = FALSE, robust.LS = FALSE, debug = TRUE),
-                            score.args))
+    scores_com <- do.call(comfam, c(list(scores, bat, covar,
+                                         model = score.model, eb = FALSE,
+                                         debug = debug), score.args))
   }
-
-  full_scores <- x_pc$x
+  full_scores <- d_pc$x
   full_scores[,1:npc] <- scores_com$dat.combat
 
-  # Project scores back into observation space
+  #### Project scores back into observation space ####
   if (std.var) {
-    data_covbat <- full_scores %*% t(x_pc$rotation) *
-      matrix(x_pc$scale, dim(x_com)[1], dim(x_com)[2], byrow = TRUE) +
-      matrix(x_pc$center, dim(x_com)[1], dim(x_com)[2], byrow = TRUE)
+    data_covbat <- full_scores %*% t(d_pc$rotation) *
+      matrix(d_pc$scale, n, p, byrow = TRUE) +
+      matrix(d_pc$center, n, p, byrow = TRUE)
   } else {
-    data_covbat <- full_scores %*% t(x_pc$rotation) +
-      matrix(x_pc$center, dim(x_com)[1], dim(x_com)[2], byrow = TRUE)
+    data_covbat <- full_scores %*% t(d_pc$rotation) +
+      matrix(d_pc$center, n, p, byrow = TRUE)
   }
 
+  # Reintroduce covariate effects
   data_covbat <- data_covbat + com_out$estimates$stand.mean
 
-  debug_out <- NULL
+  out <- list(dat.covbat = data_covbat, combat.out = com_out)
   if (debug) {
-    debug_out <- list(
-      scores.combat = scores_com
-    )
+    out$debug <- list(pc.output = d_pc, n.pc = npc, scores.combat = scores_com)
   }
-
-  return(
-    list(
-      dat.covbat = data_covbat,
-      combat.out = com_out,
-      debug = debug_out
-    )
-  )
+  out
 }
