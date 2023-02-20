@@ -1,12 +1,12 @@
 ---
-title: "ComBat Family Overview"
+title: "CovBat Family Overview"
 author: "Andrew Chen"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     toc: yes
 vignette: >
-  %\VignetteIndexEntry{ComBat Family Overview}
+  %\VignetteIndexEntry{CovBat Family Overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

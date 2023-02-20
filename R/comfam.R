@@ -81,7 +81,7 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL, eb = TRU
   stand_mean <- sapply(fits, predict, newdata = pmod)
   resid_mean <- sapply(fits, predict, newdata = mod)
 
-  var_pooled <- apply(data-resid_mean, 2, scl)*(n-1)/n
+  var_pooled <- apply(data - resid_mean, 2, scl)*(n-1)/n
 
   if (hasArg(sigma.formula)) {
     sd_mat <- sapply(fits, predict, newdata = pmod, what = "sigma")
@@ -125,9 +125,7 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL, eb = TRU
 
         if (robust.LS) {
           sum2 <- (n_b-1) * sapply(1:p, function(v) {
-            .biweight_midvar(bdat[,v], g_new[v])
-            # .mad_var(sdat[i,], g.new[i])
-          })
+            .biweight_midvar(bdat[,v], g_new[v])})
         } else {
           sum2   <- colSums(sweep(bdat, 2, g_new)^2)
         }
