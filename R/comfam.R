@@ -34,6 +34,12 @@
 #' comfam(iris, iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
 comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL, eb = TRUE,
                    robust.LS = FALSE, debug = FALSE, ...) {
+  if (hasArg(family)) {
+    if (!(family$family %in% c("gaussian", "Normal"))) {
+      warning("Families other than Gaussian are supported but experimental, output dataset will not necessarily be in the original space.")
+    }
+  }
+
   # Data details and formatting
   n <- nrow(data)
   p <- ncol(data)
@@ -78,13 +84,14 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL, eb = TRU
   pmod <- mod
   pmod$batch[] <- matrix(n_batches/n, n, nlevels(bat), byrow = TRUE)
 
-  stand_mean <- sapply(fits, predict, newdata = pmod)
-  resid_mean <- sapply(fits, predict, newdata = mod)
+  stand_mean <- sapply(fits, predict, newdata = pmod, type = "response")
+  resid_mean <- sapply(fits, predict, newdata = mod, type = "response")
 
   var_pooled <- apply(data - resid_mean, 2, scl)*(n-1)/n
 
   if (hasArg(sigma.formula)) {
-    sd_mat <- sapply(fits, predict, newdata = pmod, what = "sigma")
+    sd_mat <- sapply(fits, predict, newdata = pmod, what = "sigma",
+                     type = "response")
   } else {
     sd_mat <- matrix(sqrt(var_pooled), n, p, byrow = TRUE)
   }
