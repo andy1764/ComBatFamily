@@ -35,7 +35,7 @@
 comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL, eb = TRUE,
                    robust.LS = FALSE, debug = FALSE, ...) {
   if (hasArg(family)) {
-    if (!(family$family %in% c("gaussian", "Normal"))) {
+    if (!(list(...)$family$family %in% c("gaussian", "Normal"))) {
       warning("Families other than Gaussian are supported but experimental, output dataset will not necessarily be in the original space.")
     }
   }
