@@ -25,7 +25,7 @@ The R package can be installed via devtools by running the following code
 
 ```
 # install.packages("devtools")
-devtools::install_github("andy1764/ComBatFamily")
+devtools::install_github("andy1764/ComBatFamily", build_vignettes = TRUE)
 ```
 
 Then, you can load this package via
