@@ -23,9 +23,8 @@ covariate modeling, leveraging efficient R implementations of regression models.
 A method that belongs in the ComBat Family satisfies the following conditions:
 
 1. Modeling of covariate effects in location and scale
-2. Real-valued measurements and identity link function
-3. Batch effects in location and scale of measurements
-4. Empirical Bayes step for borrowing information across features
+2. Batch effects in location and scale of measurements
+3. Empirical Bayes step for borrowing information across features
 
 ## ComBat
 ComBat Family defaults to the original linear model used in ComBat, using 
