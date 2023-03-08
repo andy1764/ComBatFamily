@@ -4,7 +4,7 @@ Title: ComBat and CovBat Family Harmonization
 Version: 0.1.0
 Author: Andrew A. Chen
 Maintainer: Andrew Chen <chen1764@gmail.com>
-Description: Implements the ComBat and CovBat Family of harmonization methods for flexible covariate modeling while adjusting batch effects in location and scale.
+Description: Implements the ComBat and CovBat Family of harmonization methods for flexible covariate modeling while adjusting batch effects.
 License: Artistic-2.0
 Encoding: UTF-8
 VignetteBuilder: knitr
