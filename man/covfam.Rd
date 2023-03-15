@@ -80,5 +80,5 @@ covariate effects in score location and scale.
 }
 \examples{
 covfam(iris[,1:2], iris$Species)
-covfam(iris, iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
+covfam(iris[,1:2], iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
 }

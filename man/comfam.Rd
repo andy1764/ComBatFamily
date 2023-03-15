@@ -59,7 +59,7 @@ longitudinal harmonization via mixed effects models.
 }
 \examples{
 comfam(iris[,1:2], iris$Species)
-comfam(iris, iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
+comfam(iris[,1:2], iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
 }
 \seealso{
 \link[ComBatFamily]{plot.comfam} for assessing regression fit via

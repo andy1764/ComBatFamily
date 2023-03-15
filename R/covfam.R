@@ -44,7 +44,7 @@
 #'
 #' @examples
 #' covfam(iris[,1:2], iris$Species)
-#' covfam(iris, iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
+#' covfam(iris[,1:2], iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
 covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
                    score.model = NULL, score.args = NULL, eb = TRUE,
                    robust.LS = FALSE, ref.batch = NULL, percent.var = 0.95,
