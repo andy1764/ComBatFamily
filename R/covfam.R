@@ -25,17 +25,21 @@
 #' @param robust.LS If \code{TRUE}, uses robust location and scale estimators
 #'   for error variance and site effect parameters. Uses median and
 #'   biweight midvariance
+#' @param ref.batch Reference batch, must take value in `levels(bat)`
 #' @param percent.var Numeric. The number of harmonized principal component
-#'    scores is selected to explain this proportion of the variance.
+#'    scores is selected to explain this proportion of the variance
 #' @param n.pc Optional numeric. If specified, this number of principal
-#'    component scores is harmonized. Overrides \code{percent.var}.
+#'    component scores is harmonized. Overrides \code{percent.var}
 #' @param std.var If \code{TRUE}, scales variances to be equal to 1 before PCA.
-#' @param debug Whether to output model fits and intermediate data frames
 #' @param ... Additional arguments to `model`
 #'
 #' @return `covfam` returns a list containing the following components:
 #' \item{dat.covbat}{Harmonized data as a matrix with same dimensions as `data`}
+#' \item{batch.info}{Batch information, including reference batch if specified}
 #' \item{combat.out}{List output of \link[ComBatFamily]{comfam} from the ComBat step}
+#' \item{pc.output}{Output of `prcomp` from PCA step}
+#' \item{n.pc}{Numeric, number of PCs harmonized}
+#' \item{scores.com}{List output of \link[ComBatFamily]{comfam} from the CovBat step}
 #' @export
 #'
 #' @examples
@@ -43,14 +47,15 @@
 #' covfam(iris, iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
 covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
                    score.model = NULL, score.args = NULL, eb = TRUE,
-                   robust.LS = FALSE, percent.var = 0.95, n.pc = NULL,
-                   std.var = TRUE, debug = FALSE, ...)
+                   robust.LS = FALSE, ref.batch = NULL, percent.var = 0.95,
+                   n.pc = NULL, std.var = TRUE, ...)
 {
   n <- nrow(data)
   p <- ncol(data)
 
   #### Remove mean/variance effects ####
-  com_out <- comfam(data, bat, covar, model, formula, eb, robust.LS, debug, ...)
+  com_out <- comfam(data, bat, covar, model, formula, eb, robust.LS, ref.batch,
+                    ...)
   com_res <- com_out$dat.combat - com_out$estimates$stand.mean
 
   #### Adjust for multivariate batch effects via PCA ####
@@ -67,11 +72,11 @@ covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   # ComBat without covariates to remove site effect in score mean/variance
   # If score.model specified, fits that model instead
   if (is.null(score.model)) {
-    scores_com <- comfam(scores, bat, eb = FALSE, debug = debug)
+    scores_com <- comfam(scores, bat, eb = FALSE, ref.batch = ref.batch)
   } else {
     scores_com <- do.call(comfam, c(list(scores, bat, covar,
                                          model = score.model, eb = FALSE,
-                                         debug = debug), score.args))
+                                         ref.batch = ref.batch), score.args))
   }
   full_scores <- d_pc$x
   full_scores[,1:npc] <- scores_com$dat.combat
@@ -89,9 +94,15 @@ covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   # Reintroduce covariate effects
   data_covbat <- data_covbat + com_out$estimates$stand.mean
 
-  out <- list(dat.covbat = data_covbat, combat.out = com_out)
-  if (debug) {
-    out$debug <- list(pc.output = d_pc, n.pc = npc, scores.combat = scores_com)
-  }
+  batch_info <- list(
+    batch = bat,
+    levels = levels(bat)
+  )
+  batch_info$ref.batch <- ref.batch
+
+  out <- list(dat.covbat = data_covbat, batch.info = batch_info,
+              combat.out = com_out, pc.output = d_pc, n.pc = npc,
+              scores.combat = scores_com)
+  class(out) <- c("covfam")
   out
 }

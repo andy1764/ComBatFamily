@@ -14,10 +14,10 @@ covfam(
   score.args = NULL,
   eb = TRUE,
   robust.LS = FALSE,
+  ref.batch = NULL,
   percent.var = 0.95,
   n.pc = NULL,
   std.var = TRUE,
-  debug = FALSE,
   ...
 )
 }
@@ -50,22 +50,26 @@ and variance harmonization.}
 for error variance and site effect parameters. Uses median and
 biweight midvariance}
 
+\item{ref.batch}{Reference batch, must take value in \code{levels(bat)}}
+
 \item{percent.var}{Numeric. The number of harmonized principal component
-scores is selected to explain this proportion of the variance.}
+scores is selected to explain this proportion of the variance}
 
 \item{n.pc}{Optional numeric. If specified, this number of principal
-component scores is harmonized. Overrides \code{percent.var}.}
+component scores is harmonized. Overrides \code{percent.var}}
 
 \item{std.var}{If \code{TRUE}, scales variances to be equal to 1 before PCA.}
-
-\item{debug}{Whether to output model fits and intermediate data frames}
 
 \item{...}{Additional arguments to \code{model}}
 }
 \value{
 \code{covfam} returns a list containing the following components:
 \item{dat.covbat}{Harmonized data as a matrix with same dimensions as \code{data}}
+\item{batch.info}{Batch information, including reference batch if specified}
 \item{combat.out}{List output of \link[ComBatFamily]{comfam} from the ComBat step}
+\item{pc.output}{Output of \code{prcomp} from PCA step}
+\item{n.pc}{Numeric, number of PCs harmonized}
+\item{scores.com}{List output of \link[ComBatFamily]{comfam} from the CovBat step}
 }
 \description{
 Implementation of the CovBat Family of harmonization methods allowing for

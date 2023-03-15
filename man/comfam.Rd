@@ -12,7 +12,7 @@ comfam(
   formula = NULL,
   eb = TRUE,
   robust.LS = FALSE,
-  debug = FALSE,
+  ref.batch = NULL,
   ...
 )
 }
@@ -40,13 +40,15 @@ and variance harmonization}
 for error variance and site effect parameters. Currently uses median and
 biweight midvariance}
 
-\item{debug}{Whether to output model fits and intermediate data frames}
+\item{ref.batch}{Reference batch, must take value in \code{levels(bat)}}
 
 \item{...}{Additional arguments to \code{model}}
 }
 \value{
 \code{comfam} returns a list containing the following components:
 \item{dat.combat}{Harmonized data as a matrix with same dimensions as \code{data}}
+\item{batch.info}{Batch information, including reference batch if specified}
+\item{fits}{List of model fits from regression step, outputs of \code{model} for each feature}
 \item{estimates}{List of estimates from standardization and batch effect correction}
 }
 \description{
@@ -58,4 +60,8 @@ longitudinal harmonization via mixed effects models.
 \examples{
 comfam(iris[,1:2], iris$Species)
 comfam(iris, iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
+}
+\seealso{
+\link[ComBatFamily]{plot.comfam} for assessing regression fit via
+diagnostic plots associated with \code{model}
 }

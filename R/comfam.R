@@ -21,19 +21,25 @@
 #' @param robust.LS If \code{TRUE}, uses robust location and scale estimators
 #'   for error variance and site effect parameters. Currently uses median and
 #'   biweight midvariance
-#' @param debug Whether to output model fits and intermediate data frames
+#' @param ref.batch Reference batch, must take value in `levels(bat)`
 #' @param ... Additional arguments to `model`
 #'
 #' @return `comfam` returns a list containing the following components:
 #' \item{dat.combat}{Harmonized data as a matrix with same dimensions as `data`}
+#' \item{batch.info}{Batch information, including reference batch if specified}
+#' \item{fits}{List of model fits from regression step, outputs of `model` for each feature}
 #' \item{estimates}{List of estimates from standardization and batch effect correction}
 #' @export
+#'
+#' @seealso
+#' \link[ComBatFamily]{plot.comfam} for assessing regression fit via
+#' diagnostic plots associated with `model`
 #'
 #' @examples
 #' comfam(iris[,1:2], iris$Species)
 #' comfam(iris, iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
-comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL, eb = TRUE,
-                   robust.LS = FALSE, debug = FALSE, ...) {
+comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
+                   eb = TRUE, robust.LS = FALSE, ref.batch = NULL, ...) {
   if (hasArg(family)) {
     if (!(list(...)$family$family %in% c("gaussian", "Normal"))) {
       warning("Families other than Gaussian are supported but experimental, output dataset will not necessarily be in the original space.")
@@ -43,7 +49,6 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL, eb = TRU
   # Data details and formatting
   n <- nrow(data)
   p <- ncol(data)
-  fn <- colnames(data)
 
   bat <- droplevels(bat)
   batch <- model.matrix(~ -1 + bat)
@@ -83,6 +88,12 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL, eb = TRU
   # Model matrix for obtaining pooled mean
   pmod <- mod
   pmod$batch[] <- matrix(n_batches/n, n, nlevels(bat), byrow = TRUE)
+
+  # Reference batch
+  if (!is.null(ref.batch)) {
+    pmod$batch[] <- 0
+    pmod$batch[,which(levels(bat) == ref.batch)] <- 1
+  }
 
   stand_mean <- sapply(fits, predict, newdata = pmod, type = "response")
   resid_mean <- sapply(fits, predict, newdata = mod, type = "response")
@@ -191,11 +202,35 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL, eb = TRU
     delta.star = delta_star
   )
 
-  out <- list(dat.combat = data_combat, estimates = estimates)
-  if (debug) {
-    out$debug <- list(fits = fits, dat.standardized = data_stand)
-  }
+  batch_info <- list(
+    batch = bat,
+    levels = levels(bat)
+  )
+  batch_info$ref.batch <- ref.batch
+
+  out <- list(dat.combat = data_combat, batch.info = batch_info,
+              fits = fits, estimates = estimates)
+  class(out) <- "comfam"
   out
+}
+
+#' Plot Diagnostics for `comfam`
+#'
+#' Diagnostic plots for original model fits in `comfam`, leverages S3 plot
+#' methods for `model` (e.g. \link[stats]{plot.lm})
+#'
+#' @param object Object of class `comfam`, typically output of
+#'   \link[ComBatFamily]{comfam}
+#' @param feature Feature to diagnose, either index or variable name
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' com_out <- comfam(iris[,1:2], iris$Species)
+#' plot(com_out)
+plot.comfam <- function(object, feature) {
+  plot(object$fits[[feature]])
 }
 
 .biweight_midvar <- function(data, center=NULL, norm.unbiased = TRUE) {

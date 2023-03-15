@@ -17,8 +17,7 @@ covariate modeling while removing batch effects in the mean and covariance of me
 
 **NOTE:** This package is still a work-in-progress and will be updated soon to include the following features:
 - Nonparametric empirical Bayes step
-- Specification of a reference batch
-- Additional functions to assess batch effects before and after harmonization
+- Functions for evaluating batch effects before and after harmonization
 
 ## 1. Installation
 The R package can be installed via devtools by running the following code
