@@ -64,4 +64,6 @@ comfam(iris[,1:2], iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
 \seealso{
 \link[ComBatFamily]{plot.comfam} for assessing regression fit via
 diagnostic plots associated with \code{model}
+\link[ComBatFamily]{predict.comfam} for applying ComBat parameters for
+harmonization of new observations
 }

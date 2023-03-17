@@ -12,7 +12,7 @@
 
 <meta name="author" content="Andrew Chen" />
 
-<meta name="date" content="2023-03-15" />
+<meta name="date" content="2023-03-17" />
 
 <title>ComBat Family Overview</title>
 
@@ -149,7 +149,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">ComBat Family Overview</h1>
 <h4 class="author">Andrew Chen</h4>
-<h4 class="date">2023-03-15</h4>
+<h4 class="date">2023-03-17</h4>
 
 
 <div id="TOC">
@@ -168,6 +168,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>Batch effects in location and scale of measurements</li>
 <li>Empirical Bayes step for borrowing information across features</li>
 </ol>
+<p>Denote data <span class="math inline">\(y_{ijv}\)</span> and covariates <span class="math inline">\(\boldsymbol{x}_{ij}\)</span> for sites <span class="math inline">\(i = 1,2,\ldots,M\)</span>, subjects within site <span class="math inline">\(j = 1,2,\ldots,n_i\)</span>, and features <span class="math inline">\(v = 1,2,\ldots,p\)</span>. The ComBat Family assumes</p>
+<p><span class="math display">\[y_{ijv} \sim D(\mu_{ijv} + \gamma_{iv},  \delta_{iv}\sigma_{ijv})\]</span> where <span class="math inline">\(D\)</span> is a specified distribution (typically normal), <span class="math inline">\(\gamma_{iv}\)</span> is the additive location batch effect and <span class="math inline">\(\delta_{iv}\)</span> is the multiplicative scale batch effect. The mean and variance of <span class="math inline">\(D\)</span> are modeled via</p>
+<p><span class="math display">\[g_1(\mu_{ijv}) = f_v(\boldsymbol{x}_{ij}) \qquad g_2(\sigma_{ijv}) = h_v(\boldsymbol{x}_{ij})\]</span></p>
+<p>where <span class="math inline">\(g_1, g_2\)</span> are link functions and <span class="math inline">\(f_v, h_v\)</span> are specified functions.</p>
 <div id="combat" class="section level2">
 <h2>ComBat</h2>
 <p>ComBat Family defaults to the original linear model used in ComBat, using <code>formula</code> to specify covariates included in the model.</p>

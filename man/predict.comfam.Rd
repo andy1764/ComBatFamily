@@ -29,7 +29,8 @@ midvariance}
 \value{
 \code{comfam} returns a list containing the following components:
 \item{dat.combat}{New harmonized data as a matrix with same dimensions as \code{newdata}}
-\item{new.batch.info}{New batch information, including reference batch if specified}
+\item{batch.info}{New batch information, including reference batch if specified}
+\item{fits}{List of model fits from regression step, forwarded from \code{object}}
 \item{estimates}{List of estimates from standardization and batch effect correction, including new batches if relevant}
 }
 \description{

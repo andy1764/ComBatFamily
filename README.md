@@ -1,21 +1,27 @@
-# ComBat and CovBat Families of Harmonization Methods
+# ComBat Family of Harmonization Methods
 
 **Maintainer**: Andrew Chen, andrewac@pennmedicine.upenn.edu
 
 **License**: Artistic License 2.0
 
-The ComBat Family extends the original ComBat methodology to enable flexible
-covariate modeling, leveraging efficient R implementations of regression models.
-A method that belongs in the ComBat Family satisfies the following conditions:
+The ComBat Family extends the original ComBat methodology to enable flexible covariate modeling, leveraging efficient R implementations of regression models. A method that belongs in the ComBat Family satisfies the following conditions:
 
-1. Modeling of covariate effects in location and scale
-2. Batch effects in location and scale of measurements
-3. Empirical Bayes step for borrowing information across features
+- Modeling of covariate effects in location and scale
+- Batch effects in location and scale of measurements
+- Empirical Bayes step for borrowing information across features
 
-The CovBat Family likewise extends the original CovBat methodology to enable flexible
-covariate modeling while removing batch effects in the mean and covariance of measurements.
+ComBat Family methods include:
+
+1. ComBat (Johnson et al., 2007)
+2. ComBat-GAM (Pomponio et al., 2020)
+3. Longitudinal ComBat (Beer et al., 2020)
+4. Robust ComBat (Work-in-progress)
+5. ComBat-GAMLSS (Experimental)
+
+This package also includes the CovBat Family, which likewise extends the original CovBat methodology to enable flexible covariate modeling while removing batch effects in the mean and covariance of measurements.
 
 **NOTE:** This package is still a work-in-progress and will be updated soon to include the following features:
+
 - Nonparametric Empirical Bayes step
 - Empirical Bayes step leveraging non-Gaussian data distributions
 - Functions for evaluating batch effects before and after harmonization
@@ -40,6 +46,16 @@ Vignettes are provided for both the ComBat family `comfam` and the CovBat family
 ```
 vignette("comfam")
 vignette("covfam")
+```
+
+Example ComBat Family calls for `iris` data, treating `Species` as batch:
+
+```
+# Original ComBat
+comfam(iris[,1:2], iris$Species, covar = iris[3:4], lm, y ~ Petal.Length + Petal.Width)
+
+# ComBat-GAM
+comfam(iris[,1:2], iris$Species, covar = iris[3:4], gam, y ~ s(Petal.Length) + Petal.Width)
 ```
 
 Note that non-Gaussian data distributions are supported by functions such as `glm` and `gamlss`; however, the batch effect correction may produce harmonized data outside the original range of values. For now, specification of non-Gaussian distributions will generate a warning. This support is still a work-in-progress.

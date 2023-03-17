@@ -34,6 +34,8 @@
 #' @seealso
 #' \link[ComBatFamily]{plot.comfam} for assessing regression fit via
 #' diagnostic plots associated with `model`
+#' \link[ComBatFamily]{predict.comfam} for applying ComBat parameters for
+#' harmonization of new observations
 #'
 #' @examples
 #' comfam(iris[,1:2], iris$Species)
