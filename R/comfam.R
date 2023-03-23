@@ -34,6 +34,7 @@
 #' @seealso
 #' \link[ComBatFamily]{plot.comfam} for assessing regression fit via
 #' diagnostic plots associated with `model`
+#'
 #' \link[ComBatFamily]{predict.comfam} for applying ComBat parameters for
 #' harmonization of new observations
 #'
@@ -240,7 +241,7 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 #'   for new batch effect estimates Currently uses median and biweight
 #'   midvariance
 #'
-#' @return `comfam` returns a list containing the following components:
+#' @return `predict.comfam` returns a list containing the following components:
 #' \item{dat.combat}{New harmonized data as a matrix with same dimensions as `newdata`}
 #' \item{batch.info}{New batch information, including reference batch if specified}
 #' \item{fits}{List of model fits from regression step, forwarded from `object`}

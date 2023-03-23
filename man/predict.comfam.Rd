@@ -27,7 +27,7 @@ midvariance}
 \item{eb}{If \code{TRUE}, uses ComBat model with empirical Bayes for new batches}
 }
 \value{
-\code{comfam} returns a list containing the following components:
+\code{predict.comfam} returns a list containing the following components:
 \item{dat.combat}{New harmonized data as a matrix with same dimensions as \code{newdata}}
 \item{batch.info}{New batch information, including reference batch if specified}
 \item{fits}{List of model fits from regression step, forwarded from \code{object}}
