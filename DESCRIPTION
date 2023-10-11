@@ -8,6 +8,6 @@ Description: Implements the ComBat and CovBat Family of harmonization methods fo
 License: Artistic-2.0
 Encoding: UTF-8
 VignetteBuilder: knitr
-Suggests: knitr, rmarkdown
+Suggests: knitr, rmarkdown, CovBat, neuroCombat, mgcv, gamlss, longCombat, lme4
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3

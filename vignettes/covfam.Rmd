@@ -9,6 +9,7 @@ vignette: >
   %\VignetteIndexEntry{CovBat Family Overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{CovBat, mgcv}
 ---
 
 ```{r setup, include = FALSE}

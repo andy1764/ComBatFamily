@@ -31,7 +31,7 @@ The R package can be installed via devtools by running the following code
 
 ```
 # install.packages("devtools")
-devtools::install_github("andy1764/ComBatFamily", build_vignettes = TRUE)
+devtools::install_github("andy1764/ComBatFamily", build_vignettes = FALSE)
 ```
 
 Then, you can load this package via
@@ -41,7 +41,13 @@ library(ComBatFamily)
 ```
 
 ## 2. Usage
-Vignettes are provided for both the ComBat family `comfam` and the CovBat family `covfam` which can be accessed via
+Vignettes are provided for both the ComBat family `comfam` and the CovBat family `covfam`. The package needs to be installed with the following options:
+
+```
+devtools::install_github("andy1764/ComBatFamily", build_vignettes = FALSE)
+```
+
+Then, vignettes can be accessed via
 
 ```
 vignette("comfam")

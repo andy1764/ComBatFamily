@@ -9,6 +9,7 @@ vignette: >
   %\VignetteIndexEntry{ComBat Family Overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{neuroCombat, mgcv, gamlss, longCombat, lme4}
 ---
 
 ```{r setup, include = FALSE}
