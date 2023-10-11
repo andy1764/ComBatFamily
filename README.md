@@ -66,7 +66,25 @@ comfam(iris[,1:2], iris$Species, covar = iris[3:4], gam, y ~ s(Petal.Length) + P
 
 Note that non-Gaussian data distributions are supported by functions such as `glm` and `gamlss`; however, the batch effect correction may produce harmonized data outside the original range of values. For now, specification of non-Gaussian distributions will generate a warning. This support is still a work-in-progress.
 
-## 3. Citations
+## 3. Additional features
+On top of unifying existing harmonization packages, we include additional features in this package.
+
+For out-of-sample harmonization, we provide `predict.comfam` to apply estimated harmonization to a specified sample. This function will estimate new batch adjustment parameters if needed, otherwise it will apply existing estimates. Below is an example call:
+
+```
+com_out <- comfam(iris[1:75,1:2], iris$Species[1:75])
+
+# out-of-sample with new batch
+out_pred <- predict(com_out, iris[76:150,1:2], iris$Species[76:150])
+
+# in-sample
+in_pred <- predict(com_out, iris[1:25,1:2], iris$Species[1:25])
+max(in_pred$dat.combat - com_out$dat.combat[1:25,])
+```
+
+We also provide a wrapper to access model fit diagnostic plots, `plot.comfam`. Other additional features are in active development.
+
+## 4. Citations
 The original ComBat methodology is implemented in R, Matlab, and Python at https://github.com/Jfortin1/ComBatHarmonization. When using ComBat, please cite the following papers:
 
 > Fortin, J.-P., Cullen, N., Sheline, Y. I., Taylor, W. D., Aselcioglu, I., Cook, P. A., Adams, P., Cooper, C., Fava, M., McGrath, P. J., McInnis, M., Phillips, M. L., Trivedi, M. H., Weissman, M. M., & Shinohara, R. T. (2018). Harmonization of cortical thickness measurements across scanners and sites. *NeuroImage*, 167, 104–120. https://doi.org/10.1016/j.neuroimage.2017.11.024
