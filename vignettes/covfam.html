@@ -12,7 +12,7 @@
 
 <meta name="author" content="Andrew Chen" />
 
-<meta name="date" content="2023-10-11" />
+<meta name="date" content="2023-10-20" />
 
 <title>CovBat Family Overview</title>
 
@@ -340,15 +340,15 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">CovBat Family Overview</h1>
 <h4 class="author">Andrew Chen</h4>
-<h4 class="date">2023-10-11</h4>
+<h4 class="date">2023-10-20</h4>
 
 
 <div id="TOC">
 <ul>
 <li><a href="#covbat" id="toc-covbat">CovBat</a></li>
 <li><a href="#covbat-gam" id="toc-covbat-gam">CovBat-GAM</a></li>
-<li><a href="#covbat-with-modeling-of-scores" id="toc-covbat-with-modeling-of-scores">CovBat with Modeling of
-Scores</a></li>
+<li><a href="#covbat-with-modeling-of-scores" id="toc-covbat-with-modeling-of-scores">CovBat with modeling of
+scores</a></li>
 <li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
@@ -358,7 +358,7 @@ flexible covariate modeling, leveraging efficient R implementations of
 regression models. A method that belongs in the CovBat Family satisfies
 the following conditions:</p>
 <ol style="list-style-type: decimal">
-<li>Modeling of covariate effects in location and scale</li>
+<li>Modeling of covariate effects in location and/or scale</li>
 <li>Batch effects in mean and covariance of measurements</li>
 <li>Empirical Bayes step for borrowing information across features</li>
 <li>Adjustment of multivariate covariate and batch effects through
@@ -405,7 +405,7 @@ CovBat family and can be easily implemented.</p>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>cg <span class="ot">&lt;-</span> <span class="fu">covfam</span>(data, bat, covar, gam, <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> x2)</span></code></pre></div>
 </div>
 <div id="covbat-with-modeling-of-scores" class="section level2">
-<h2>CovBat with Modeling of Scores</h2>
+<h2>CovBat with modeling of scores</h2>
 <p>CovBat Family extends the original CovBat method by enabling modeling
 of covariate effects in the principal component (PC) scores. The model
 is estimated separately from the model used in the standardization

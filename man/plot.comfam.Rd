@@ -12,11 +12,14 @@
 
 \item{feature}{Feature to diagnose, either index or variable name}
 }
+\value{
+\code{plot.comfam} displays plots from the model fit.
+}
 \description{
 Diagnostic plots for original model fits in \code{comfam}, leverages S3 plot
 methods for \code{model} (e.g. \link[stats]{plot.lm})
 }
 \examples{
 com_out <- comfam(iris[,1:2], iris$Species)
-plot(com_out)
+plot(com_out, "Sepal.Width")
 }

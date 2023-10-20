@@ -29,6 +29,9 @@
 #' \item{batch.info}{Batch information, including reference batch if specified}
 #' \item{fits}{List of model fits from regression step, outputs of `model` for each feature}
 #' \item{estimates}{List of estimates from standardization and batch effect correction}
+#'
+#' @import stats
+#' @importFrom methods hasArg
 #' @export
 #'
 #' @seealso
@@ -43,7 +46,7 @@
 #' comfam(iris[,1:2], iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
 comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
                    eb = TRUE, robust.LS = FALSE, ref.batch = NULL, ...) {
-  if (hasArg(family)) {
+  if (hasArg("family")) {
     if (!(list(...)$family$family %in% c("gaussian", "Normal"))) {
       warning("Families other than Gaussian are supported but experimental, output dataset will not necessarily be in the original space.")
 
@@ -104,7 +107,7 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 
   var_pooled <- apply(data - resid_mean, 2, scl)*(n-1)/n
 
-  if (hasArg(sigma.formula)) {
+  if (hasArg("sigma.formula")) {
     sd_mat <- sapply(fits, predict, newdata = pmod, what = "sigma",
                      type = "response")
   } else {
@@ -246,6 +249,9 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 #' \item{batch.info}{New batch information, including reference batch if specified}
 #' \item{fits}{List of model fits from regression step, forwarded from `object`}
 #' \item{estimates}{List of estimates from standardization and batch effect correction, including new batches if relevant}
+#'
+#' @import stats
+#' @importFrom methods hasArg
 #' @export
 #'
 #' @examples
@@ -304,7 +310,7 @@ predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
   }
 
   stand_mean <- sapply(fits, predict, newdata = pmod, type = "response")
-  if (hasArg(sigma.formula)) {
+  if (hasArg("sigma.formula")) {
     sd_mat <- sapply(fits, predict, newdata = pmod, what = "sigma",
                      type = "response")
   } else {
@@ -428,12 +434,12 @@ predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
 #'   \link[ComBatFamily]{comfam}
 #' @param feature Feature to diagnose, either index or variable name
 #'
-#' @return
+#' @return `plot.comfam` displays plots from the model fit.
 #' @export
 #'
 #' @examples
 #' com_out <- comfam(iris[,1:2], iris$Species)
-#' plot(com_out)
+#' plot(com_out, "Sepal.Width")
 plot.comfam <- function(object, feature) {
   plot(object$fits[[feature]])
 }

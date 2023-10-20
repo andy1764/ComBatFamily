@@ -23,7 +23,7 @@ The CovBat Family extends the original CovBat methodology to enable flexible
 covariate modeling, leveraging efficient R implementations of regression models.
 A method that belongs in the CovBat Family satisfies the following conditions:
 
-1. Modeling of covariate effects in location and scale
+1. Modeling of covariate effects in location and/or scale
 2. Batch effects in mean and covariance of measurements
 3. Empirical Bayes step for borrowing information across features
 4. Adjustment of multivariate covariate and batch effects through principal 
@@ -74,7 +74,7 @@ suppressPackageStartupMessages(
 cg <- covfam(data, bat, covar, gam, formula = y ~ s(x1) + x2)
 ```
 
-## CovBat with Modeling of Scores
+## CovBat with modeling of scores
 CovBat Family extends the original CovBat method by enabling modeling of
 covariate effects in the principal component (PC) scores. The model is estimated
 separately from the model used in the standardization step.

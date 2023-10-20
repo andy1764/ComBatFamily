@@ -23,7 +23,7 @@ The ComBat Family extends the original ComBat methodology to enable flexible
 covariate modeling, leveraging efficient R implementations of regression models.
 A method that belongs in the ComBat Family satisfies the following conditions:
 
-1. Modeling of covariate effects in location and scale
+1. Modeling of covariate effects in location and/or scale
 2. Batch effects in location and scale of measurements
 3. Empirical Bayes step for borrowing information across features
 
@@ -83,10 +83,10 @@ cg <- comfam(data, bat, covar, gam, formula = y ~ s(x1) + x2)
 ```
 
 
-## ComBat-GAMLSS
+## ComBat with location-scale models (ComBat-LS)
 ComBat Family supports modeling of covariate effects on the scale of
 measurements via GAMLSS, which is still experimental. Testing is ongoing, but 
-ComBat-GAMLSS should be considered in settings with potential covariate effects
+ComBat-LS should be considered in settings with potential covariate effects
 on scale (e.g. age affecting the variance of imaging features).
 
 ```{r}

@@ -40,6 +40,8 @@
 #' \item{pc.output}{Output of `prcomp` from PCA step}
 #' \item{n.pc}{Numeric, number of PCs harmonized}
 #' \item{scores.com}{List output of \link[ComBatFamily]{comfam} from the CovBat step}
+#'
+#' @import stats
 #' @export
 #'
 #' @examples

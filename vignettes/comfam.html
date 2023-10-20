@@ -12,7 +12,7 @@
 
 <meta name="author" content="Andrew Chen" />
 
-<meta name="date" content="2023-10-11" />
+<meta name="date" content="2023-10-20" />
 
 <title>ComBat Family Overview</title>
 
@@ -340,14 +340,15 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">ComBat Family Overview</h1>
 <h4 class="author">Andrew Chen</h4>
-<h4 class="date">2023-10-11</h4>
+<h4 class="date">2023-10-20</h4>
 
 
 <div id="TOC">
 <ul>
 <li><a href="#combat" id="toc-combat">ComBat</a></li>
 <li><a href="#combat-gam" id="toc-combat-gam">ComBat-GAM</a></li>
-<li><a href="#combat-gamlss" id="toc-combat-gamlss">ComBat-GAMLSS</a></li>
+<li><a href="#combat-with-location-scale-models-combat-ls" id="toc-combat-with-location-scale-models-combat-ls">ComBat with
+location-scale models (ComBat-LS)</a></li>
 <li><a href="#longitudinal-combat" id="toc-longitudinal-combat">Longitudinal ComBat</a></li>
 <li><a href="#references" id="toc-references">References</a></li>
 </ul>
@@ -358,7 +359,7 @@ flexible covariate modeling, leveraging efficient R implementations of
 regression models. A method that belongs in the ComBat Family satisfies
 the following conditions:</p>
 <ol style="list-style-type: decimal">
-<li>Modeling of covariate effects in location and scale</li>
+<li>Modeling of covariate effects in location and/or scale</li>
 <li>Batch effects in location and scale of measurements</li>
 <li>Empirical Bayes step for borrowing information across features</li>
 </ol>
@@ -421,13 +422,13 @@ using notation consistent with the <code>gam</code> function.</p>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>)</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>cg <span class="ot">&lt;-</span> <span class="fu">comfam</span>(data, bat, covar, gam, <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> x2)</span></code></pre></div>
 </div>
-<div id="combat-gamlss" class="section level2">
-<h2>ComBat-GAMLSS</h2>
+<div id="combat-with-location-scale-models-combat-ls" class="section level2">
+<h2>ComBat with location-scale models (ComBat-LS)</h2>
 <p>ComBat Family supports modeling of covariate effects on the scale of
 measurements via GAMLSS, which is still experimental. Testing is
-ongoing, but ComBat-GAMLSS should be considered in settings with
-potential covariate effects on scale (e.g. age affecting the variance of
-imaging features).</p>
+ongoing, but ComBat-LS should be considered in settings with potential
+covariate effects on scale (e.g. age affecting the variance of imaging
+features).</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">library</span>(gamlss)</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>)</span>
