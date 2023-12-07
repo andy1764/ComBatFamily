@@ -1,9 +1,9 @@
 # ComBat Family of Harmonization Methods
 
-**Maintainers**: 
-Andrew A. Chen, chenandr@musc.edu
-Haochang Shou, hshou@pennmedicine.upenn.edu
-Zheng Ren, zheng.ren@pennmedicine.upenn.edu
+**Maintainers**:  
+Andrew A. Chen, chenandr@musc.edu  
+Haochang Shou, hshou@pennmedicine.upenn.edu  
+Zheng Ren, zheng.ren@pennmedicine.upenn.edu  
 Randa Melham, randa.melhem@pennmedicine.upenn.edu
 
 **License**: Artistic License 2.0
