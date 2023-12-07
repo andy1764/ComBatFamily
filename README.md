@@ -1,6 +1,10 @@
 # ComBat Family of Harmonization Methods
 
-**Maintainer**: Andrew Chen, andrewac@pennmedicine.upenn.edu
+**Maintainers**: 
+Andrew A. Chen, chenandr@musc.edu
+Haochang Shou, hshou@pennmedicine.upenn.edu
+Zheng Ren, zheng.ren@pennmedicine.upenn.edu
+Randa Melham, randa.melhem@pennmedicine.upenn.edu
 
 **License**: Artistic License 2.0
 
@@ -69,7 +73,7 @@ Note that non-Gaussian data distributions are supported by functions such as `gl
 ## 3. Additional features
 On top of unifying existing harmonization packages, we include additional features in this package.
 
-For out-of-sample harmonization, we provide `predict.comfam` to apply estimated harmonization to a specified sample. This function will estimate new batch adjustment parameters if needed, otherwise it will apply existing estimates. Below is an example call:
+For out-of-sample harmonization, we provide `predict.comfam` to apply estimated harmonization to a specified sample. This function will estimate new batch adjustment parameters if needed, otherwise it will apply existing estimates. `predict.comfam` has been tested for linear models (`lm`) and generalized additive models (`gam`), but may give errors for other chosen models. Below is an example call:
 
 ```
 com_out <- comfam(iris[1:75,1:2], iris$Species[1:75])
