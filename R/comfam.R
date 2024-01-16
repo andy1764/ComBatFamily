@@ -55,8 +55,14 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   }
 
   # Data details and formatting
+  data <- as.matrix(data)
   n <- nrow(data)
   p <- ncol(data)
+
+  if ((p == 1) & eb) {
+    warning("EB step skipped for univariate data.")
+    eb <- FALSE
+  }
 
   bat <- droplevels(bat)
   batch <- model.matrix(~ -1 + bat)
@@ -111,14 +117,16 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
     sd_mat <- sapply(fits, predict, newdata = pmod, what = "sigma",
                      type = "response")
   } else {
-    sd_mat <- matrix(sqrt(var_pooled), n, p, byrow = TRUE)
+    sd_mat <- sapply(sqrt(var_pooled), rep, n)
   }
 
   data_stand <- (data-stand_mean)/sd_mat
 
   #### Obtain location and scale adjustments ####
-  gamma_hat <- do.call(rbind, by(data_stand, bat, function(x) apply(x, 2, loc)))
-  delta_hat <- do.call(rbind, by(data_stand, bat, function(x) apply(x, 2, scl)))
+  gamma_hat <- Reduce(rbind, by(data_stand, bat, function(x) apply(x, 2, loc)))
+  delta_hat <- Reduce(rbind, by(data_stand, bat, function(x) apply(x, 2, scl)))
+
+  rownames(gamma_hat) <- rownames(delta_hat) <- levels(bat)
 
   # Empirical Bayes adjustments
   if (eb) {
@@ -191,9 +199,9 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   # Remove batch effects
   data_nb <- data_stand
   for (i in 1:nlevels(bat)) {
-    data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],], 2,
+    data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],, drop = FALSE], 2,
                                     gamma_star[i,], "-")
-    data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],], 2,
+    data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],, drop = FALSE], 2,
                                     sqrt(delta_star[i,]), "/")
   }
 
@@ -265,9 +273,14 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 #' max(in_pred$dat.combat - com_out$dat.combat[1:25,])
 predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
                            robust.LS = FALSE, eb = TRUE) {
-  data <- newdata
+  data <- as.matrix(newdata)
   n <- nrow(data)
   p <- ncol(data)
+
+  if ((p == 1) & eb) {
+    warning("EB step skipped for univariate data.")
+    eb <- FALSE
+  }
 
   # Specify robust location/scale estimators
   if (robust.LS) {
@@ -322,8 +335,10 @@ predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
   #### Obtain location and scale adjustments ####
   # get naive estimates for new batches
   for (i in newbat_est) {
-    gamma_hat <- rbind(gamma_hat, apply(data_stand[batches[[i]],], 2, loc))
-    delta_hat <- rbind(delta_hat, apply(data_stand[batches[[i]],], 2, scl))
+    gamma_hat <- rbind(gamma_hat,
+                       apply(data_stand[batches[[i]],, drop = FALSE], 2, loc))
+    delta_hat <- rbind(delta_hat,
+                       apply(data_stand[batches[[i]],, drop = FALSE], 2, scl))
   }
 
   rownames(gamma_hat) <- rownames(delta_hat) <- bat_levels
@@ -394,9 +409,9 @@ predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
   # Remove batch effects
   data_nb <- data_stand
   for (i in newbat_adj) {
-    data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],], 2,
+    data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],, drop = FALSE], 2,
                                     gamma_star[i,], "-")
-    data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],], 2,
+    data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],, drop = FALSE], 2,
                                     sqrt(delta_star[i,]), "/")
   }
 
@@ -442,6 +457,10 @@ predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
 #' plot(com_out, "Sepal.Width")
 plot.comfam <- function(object, feature) {
   plot(object$fits[[feature]])
+}
+
+print.comfam <- function(object) {
+  print(object$dat.combat)
 }
 
 .biweight_midvar <- function(data, center=NULL, norm.unbiased = TRUE) {

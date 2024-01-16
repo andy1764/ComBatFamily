@@ -52,6 +52,7 @@ covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
                    robust.LS = FALSE, ref.batch = NULL, percent.var = 0.95,
                    n.pc = NULL, std.var = TRUE, ...)
 {
+  data <- as.matrix(data)
   n <- nrow(data)
   p <- ncol(data)
 
@@ -107,4 +108,8 @@ covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
               scores.combat = scores_com)
   class(out) <- c("covfam")
   out
+}
+
+print.covfam <- function(object) {
+  print(object$dat.covbat)
 }
