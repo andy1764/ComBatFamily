@@ -251,6 +251,8 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 #' @param robust.LS If \code{TRUE}, uses robust location and scale estimators
 #'   for new batch effect estimates Currently uses median and biweight
 #'   midvariance
+#' @param ... Additional arguments to `predict` for the class of `model` (e.g.
+#'   `predict.lm` for ComBat)
 #'
 #' @return `predict.comfam` returns a list containing the following components:
 #' \item{dat.combat}{New harmonized data as a matrix with same dimensions as `newdata`}
@@ -272,7 +274,17 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 #' in_pred <- predict(com_out, iris[1:25,1:2], iris$Species[1:25])
 #' max(in_pred$dat.combat - com_out$dat.combat[1:25,])
 predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
-                           robust.LS = FALSE, eb = TRUE) {
+                           robust.LS = FALSE, eb = TRUE, ...) {
+  # model_class <- class(object$fits[[1]])
+  # if (c("lm", "rq", "gam", "lmerMod") %in% model_class) {
+  #   cat("Applying out-of-sample using model of class", model_class, "/n")
+  #   if (model_class == "lmerMod") {
+  #     warning("For new samples, consider using argument allow.new.levels")
+  #   }
+  # } else {
+  #   warning(cat("Model of class", model_class, "may be unsupported"))
+  # }
+
   data <- as.matrix(newdata)
   n <- nrow(data)
   p <- ncol(data)
@@ -322,12 +334,12 @@ predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
     pmod <- data.frame(newcovar, I(batch))
   }
 
-  stand_mean <- sapply(fits, predict, newdata = pmod, type = "response")
+  stand_mean <- sapply(fits, predict, newdata = pmod, type = "response", ...)
   if (hasArg("sigma.formula")) {
     sd_mat <- sapply(fits, predict, newdata = pmod, what = "sigma",
-                     type = "response")
+                     type = "response", ...)
   } else {
-    sd_mat <- matrix(sqrt(var_pooled), n, p, byrow = TRUE)
+    sd_mat <- sapply(sqrt(var_pooled), rep, n)
   }
 
   data_stand <- (data - stand_mean)/sd_mat
@@ -457,10 +469,6 @@ predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
 #' plot(com_out, "Sepal.Width")
 plot.comfam <- function(object, feature) {
   plot(object$fits[[feature]])
-}
-
-print.comfam <- function(object) {
-  print(object$dat.combat)
 }
 
 .biweight_midvar <- function(data, center=NULL, norm.unbiased = TRUE) {

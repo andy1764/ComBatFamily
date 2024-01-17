@@ -109,7 +109,3 @@ covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   class(out) <- c("covfam")
   out
 }
-
-print.covfam <- function(object) {
-  print(object$dat.covbat)
-}
