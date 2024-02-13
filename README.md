@@ -45,13 +45,13 @@ library(ComBatFamily)
 ```
 
 ## 2. Usage
-Vignettes are provided for both the ComBat family `comfam` and the CovBat family `covfam`. The package needs to be installed with the following options:
+Vignettes are provided for both the ComBat family `comfam` and the CovBat family `covfam`. To install with vignettes, first install the suggested dependencies then run:
 
 ```
-devtools::install_github("andy1764/ComBatFamily", build_vignettes = FALSE)
+devtools::install_github("andy1764/ComBatFamily", build_vignettes = TRUE)
 ```
 
-Then, vignettes can be accessed via
+Vignettes can then be accessed via
 
 ```
 vignette("comfam")
