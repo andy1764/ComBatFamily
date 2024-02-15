@@ -64,6 +64,14 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
     eb <- FALSE
   }
 
+  if (!is.null(ref.batch)) {
+    if (!(ref.batch %in% levels(bat))) {
+      stop("Reference batch must be in the batch levels")
+    }
+    ref <- bat == ref.batch
+    nref <- sum(ref)
+  }
+
   bat <- droplevels(bat)
   batch <- model.matrix(~ -1 + bat)
   batches <- lapply(levels(bat), function(x) which(bat == x))
@@ -111,7 +119,11 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   stand_mean <- sapply(fits, predict, newdata = pmod, type = "response")
   resid_mean <- sapply(fits, predict, newdata = mod, type = "response")
 
-  var_pooled <- apply(data - resid_mean, 2, scl)*(n-1)/n
+  if (!is.null(ref.batch)) {
+    var_pooled <- apply((data - resid_mean)[ref,], 2, scl) * (nref - 1)/nref
+  } else {
+    var_pooled <- apply(data - resid_mean, 2, scl) * (n - 1)/n
+  }
 
   if (hasArg("sigma.formula")) {
     sd_mat <- sapply(fits, predict, newdata = pmod, what = "sigma",
@@ -207,6 +219,10 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 
   # Reintroduce covariate effects
   data_combat <- data_nb*sd_mat + stand_mean
+
+  if (!is.null(ref.batch)) {
+    data_combat[ref,] <- data[ref,]
+  }
 
   estimates <-  list(
     stand.mean = stand_mean,
