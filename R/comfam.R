@@ -97,13 +97,27 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
     formula <- y ~ 1
   }
 
-  fits <- apply(data, 2, function(y) {
-    dat <- data.frame(y = y, mod)
+  # case when using nlme::lme
+  if (hasArg("fixed")) {
+    fits <- apply(data, 2, function(y) {
+      dat <- data.frame(y = y, mod)
 
-    # include batch in formula to target pooled mean/variance
-    bat_formula <- update(formula, ~ . + batch + -1)
-    do.call(model, list(formula = bat_formula, data = dat, ...))
-  })
+      addargs <- list(...)
+      addargs$fixed <- NULL
+
+      # include batch in formula to target pooled mean/variance
+      bat_formula <- update(formula, ~ . + batch + -1)
+      do.call(model, c(list(fixed = bat_formula, data = dat), addargs))
+    })
+  } else {
+    fits <- apply(data, 2, function(y) {
+      dat <- data.frame(y = y, mod)
+
+      # include batch in formula to target pooled mean/variance
+      bat_formula <- update(formula, ~ . + batch + -1)
+      do.call(model, list(formula = bat_formula, data = dat, ...))
+    })
+  }
 
   #### Standardize the data ####
   # Model matrix for obtaining pooled mean
