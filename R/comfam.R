@@ -344,14 +344,15 @@ predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
   fits <- object$fits
 
   #### Match new batches to old batches ####
+  known <- rownames(gamma_hat)
   bat <- droplevels(bat)
   newbat <- droplevels(newbat)
-  bat_levels <- union(levels(bat), levels(newbat))
+  bat_levels <- union(known, levels(newbat))
   newbat_app <- factor(newbat, bat_levels)
   batches <- lapply(levels(newbat_app), function(x) which(newbat_app == x))
 
   # new batches to estimate/adjust
-  newbat_est <- which(bat_levels %in% setdiff(levels(newbat), levels(bat)))
+  newbat_est <- which(bat_levels %in% setdiff(levels(newbat), known))
   newbat_adj <- which(bat_levels %in% levels(newbat))
 
   #### Standardize the data ####
@@ -470,11 +471,7 @@ predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
     delta.star = delta_star
   )
 
-  batch_info <- list(
-    batch = newbat_app,
-    batch.mod = batch,
-    ref.batch = object$batch.info$ref.batch
-  )
+  batch_info <- object$batch.info
 
   out <- list(dat.combat = data_combat, batch.info = batch_info,
               fits = fits, estimates = estimates)
