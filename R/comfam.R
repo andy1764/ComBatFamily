@@ -134,7 +134,8 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   resid_mean <- sapply(fits, predict, newdata = mod, type = "response")
 
   if (!is.null(ref.batch)) {
-    var_pooled <- apply((data - resid_mean)[ref,], 2, scl) * (nref - 1)/nref
+    var_pooled <- apply((data - resid_mean)[ref, , drop = FALSE], 2, scl) *
+      (nref - 1)/nref
   } else {
     var_pooled <- apply(data - resid_mean, 2, scl) * (n - 1)/n
   }
