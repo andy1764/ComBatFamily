@@ -54,6 +54,14 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
     }
   }
 
+  if(is.null(formula) && !(is.null(covar))) {
+    warning("Covariates included but not controlled for, use the formula argument to control for covariates")
+  }
+
+  if(!(is.null(formula)) && is.null(covar)) {
+    warning("Formula specified but covariates not included, covariate effects may not be preserved")
+  }
+
   # Data details and formatting
   data <- as.matrix(data)
   n <- nrow(data)

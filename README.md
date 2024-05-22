@@ -1,5 +1,7 @@
 # ComBat Family of Harmonization Methods
 
+**Author**: Andrew A. Chen, chenandr@musc.edu 
+
 **Maintainers**:  
 Andrew A. Chen, chenandr@musc.edu  
 Haochang Shou, hshou@pennmedicine.upenn.edu  
