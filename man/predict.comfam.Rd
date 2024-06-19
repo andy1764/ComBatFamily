@@ -4,7 +4,15 @@
 \alias{predict.comfam}
 \title{Apply Harmonization to New Data}
 \usage{
-\method{predict}{comfam}(object, newdata, newbat, newcovar = NULL, robust.LS = FALSE, eb = TRUE)
+\method{predict}{comfam}(
+  object,
+  newdata,
+  newbat,
+  newcovar = NULL,
+  robust.LS = FALSE,
+  eb = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{Object of class \code{comfam}, typically output of
@@ -25,6 +33,9 @@ for new batch effect estimates Currently uses median and biweight
 midvariance}
 
 \item{eb}{If \code{TRUE}, uses ComBat model with empirical Bayes for new batches}
+
+\item{...}{Additional arguments to \code{predict} for the class of \code{model} (e.g.
+\code{predict.lm} for ComBat)}
 }
 \value{
 \code{predict.comfam} returns a list containing the following components:

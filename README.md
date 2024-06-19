@@ -5,8 +5,9 @@
 **Maintainers**:  
 Andrew A. Chen, chenandr@musc.edu  
 Haochang Shou, hshou@pennmedicine.upenn.edu  
+Margaret Gardner, margaret.gardner@pennmedicine.upenn.edu  
 Zheng Ren, zheng.ren@pennmedicine.upenn.edu  
-Randa Melham, randa.melhem@pennmedicine.upenn.edu
+Randa Melham, randa.melhem@pennmedicine.upenn.edu  
 
 **License**: Artistic License 2.0
 
@@ -22,7 +23,7 @@ ComBat Family methods include:
 2. ComBat-GAM (Pomponio et al., 2020)
 3. Longitudinal ComBat (Beer et al., 2020)
 4. Robust ComBat (Work-in-progress)
-5. ComBat-GAMLSS (Experimental)
+5. ComBatLS (Work-in-progress)
 
 This package also includes the CovBat Family, which likewise extends the original CovBat methodology to enable flexible covariate modeling while removing batch effects in the mean and covariance of measurements.
 
@@ -68,6 +69,10 @@ comfam(iris[,1:2], iris$Species, covar = iris[3:4], lm, y ~ Petal.Length + Petal
 
 # ComBat-GAM
 comfam(iris[,1:2], iris$Species, covar = iris[3:4], gam, y ~ s(Petal.Length) + Petal.Width)
+
+# Alternative shorthand functions
+combat(iris[,1:2], iris$Species, covar = iris[3:4], y ~ Petal.Length + Petal.Width)
+combat_gam(iris[,1:2], iris$Species, covar = iris[3:4], y ~ s(Petal.Length) + Petal.Width)
 ```
 
 Note that non-Gaussian data distributions are supported by functions such as `glm` and `gamlss`; however, the batch effect correction may produce harmonized data outside the original range of values. For now, specification of non-Gaussian distributions will generate a warning. This support is still a work-in-progress.
@@ -109,6 +114,7 @@ For longitudinal ComBat, the original R package is available at https://github.c
 
 For ComBat-GAM, the Python implementation is available via https://github.com/rpomponio/neuroHarmonize with corresponding paper:
 
-> Pomponio, R., Shou, H., Davatzikos, C., et al., (2020). "Harmonization of large MRI datasets for the analysis of brain imaging patterns throughout the lifespan." *NeuroImage* 208. https://doi.org/10.1016/j.neuroimage.2019.116450.
+> Pomponio, R., Erus, G., Habes, M., Doshi, J., Srinivasan, D., Mamourian, E., Bashyam, V., Nasrallah, I. M., Satterthwaite, T. D., Fan, Y., Launer, L. J., Masters, C. L., Maruff, P., Zhuo, C., Völzke, H., Johnson, S. C., Fripp, J., Koutsouleris, N., Wolf, D. H., … Shou, H., Davatzikos, C. (2020). Harmonization of large MRI datasets for the analysis of brain imaging patterns throughout the lifespan. *NeuroImage*, 208, 116450. https://doi.org/10.1016/j.neuroimage.2019.116450
+
 
 

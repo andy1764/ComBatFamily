@@ -1,14 +1,14 @@
 Package: ComBatFamily
 Type: Package
 Title: ComBat Family of Harmonization Methods
-Version: 0.1.0
+Version: 0.2.0
 Author: Andrew A. Chen
 Maintainer: Andrew Chen <chen1764@gmail.com>
 Description: Implements the ComBat and CovBat Family of harmonization methods for flexible covariate modeling while adjusting batch effects.
 License: Artistic-2.0
 Encoding: UTF-8
 VignetteBuilder: knitr
-Imports: methods
-Suggests: knitr, rmarkdown, CovBat, neuroCombat, mgcv, gamlss, longCombat, lme4
+Imports: methods, mgcv, gamlss, lme4
+Suggests: knitr, rmarkdown, CovBat, neuroCombat, longCombat
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
