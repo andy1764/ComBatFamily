@@ -47,7 +47,7 @@
 comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
                    eb = TRUE, robust.LS = FALSE, ref.batch = NULL, ...) {
   if (hasArg("family")) {
-    if (!(list(...)$family$family %in% c("gaussian", "Normal"))) {
+    if (list(...)$family$family[1] != "NO") {
       warning("Families other than Gaussian are supported but experimental, output dataset will not necessarily be in the original space.")
 
       warning("EB step will still assume Gaussian errors.")
