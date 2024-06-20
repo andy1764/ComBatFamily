@@ -1,7 +1,7 @@
 Package: ComBatFamily
 Type: Package
 Title: ComBat Family of Harmonization Methods
-Version: 0.2.0
+Version: 0.2.1
 Author: Andrew A. Chen
 Maintainer: Andrew Chen <chen1764@gmail.com>
 Description: Implements the ComBat and CovBat Family of harmonization methods for flexible covariate modeling while adjusting batch effects.

@@ -141,3 +141,54 @@ long_combat <- function(data, bat, covar = NULL, formula = NULL,
                         eb = TRUE, robust.LS = FALSE, ref.batch = NULL, ...) {
   comfam(data, bat, covar, lmer, formula, eb, robust.LS, ref.batch, ...)
 }
+
+#' ComBatLS: Location- and scale-preserving harmonization
+#'
+#' Implementation of ComBatLS (Gardner et al.) using \link[ComBatFamily]{comfam} with `model` as \link[gamlss]{gamlss}
+#' and `family = NO()`. Use `sigma.formula` to specify the scale-preserving model.
+#'
+#' @param data \emph{n x p} data frame or matrix of observations where
+#'   \emph{p} is the number of features and \emph{n} is the number of subjects.
+#' @param bat Factor indicating batch (often equivalent to site or scanner)
+#' @param covar Data frame or matrix of covariates supplied to \link[gamlss]{gamlss}
+#' @param formula Formula for \link[gamlss]{gamlss} starting with `y ~` where `y` represents
+#'   each feature
+#' @param sigma.formula Formula for variance modeling, formatted following \link[gamlss]{gamlss}
+#' @param eb If \code{TRUE}, uses ComBat model with empirical Bayes for mean
+#'   and variance harmonization
+#' @param robust.LS If \code{TRUE}, uses robust location and scale estimators
+#'   for error variance and site effect parameters. Currently uses median and
+#'   biweight midvariance
+#' @param ref.batch Reference batch, must take value in `levels(bat)`
+#' @param ... Additional arguments passed to \link[gamlss]{gamlss}
+#'
+#' @return `combat` returns a list containing the following components:
+#' \item{dat.combat}{Harmonized data as a matrix with same dimensions as `data`}
+#' \item{batch.info}{Batch information, including reference batch if specified}
+#' \item{fits}{List of model fits from regression step, outputs of \link[gamlss]{gamlss} for each feature}
+#' \item{estimates}{List of estimates from standardization and batch effect correction}
+#'
+#' @import stats gamlss
+#' @importFrom methods hasArg
+#' @export
+#'
+#' @seealso
+#' \link[ComBatFamily]{plot.comfam} for assessing regression fit via
+#' diagnostic plots associated with \link[gamlss]{gamlss}
+#'
+#' \link[ComBatFamily]{predict.comfam} for applying ComBat parameters for
+#' harmonization of new observations
+#'
+#' @examples
+#' combatls(iris[,1:2], iris$Species)
+#' combatls(iris[,1:2], iris$Species, iris[3:4], y ~ Petal.Length + Petal.Width,
+#'   ~ Petal.Length)
+#'
+#' @references
+#' Gardner et al. to be posted on biorxiv
+combatls <- function(data, bat, covar = NULL, formula = NULL,
+                     sigma.formula = ~ 1, eb = TRUE, robust.LS = FALSE,
+                     ref.batch = NULL, ...) {
+  comfam(data, bat, covar, gamlss, formula, eb, robust.LS, ref.batch,
+         sigma.formula = sigma.formula, family = NO(), ...)
+}
