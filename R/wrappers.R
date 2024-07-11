@@ -185,7 +185,7 @@ long_combat <- function(data, bat, covar = NULL, formula = NULL,
 #'   ~ Petal.Length)
 #'
 #' @references
-#' Gardner et al. to be posted on biorxiv
+#' Gardner, M., Shinohara, R. T., Bethlehem, R. A. I., Romero-Garcia, R., Warrier, V., Dorfschmidt, L., Shanmugan, S., Seidlitz, J., Alexander-Bloch, A., & Chen, A. (2024). ComBatLS: A location- and scale-preserving method for multi-site image harmonization. bioRxiv, 2024.06.21.599875. https://doi.org/10.1101/2024.06.21.599875
 combatls <- function(data, bat, covar = NULL, formula = NULL,
                      sigma.formula = ~ 1, eb = TRUE, robust.LS = FALSE,
                      ref.batch = NULL, ...) {
