@@ -23,7 +23,7 @@ ComBat Family methods include:
 2. ComBat-GAM (Pomponio et al., 2020)
 3. Longitudinal ComBat (Beer et al., 2020)
 4. Robust ComBat (Work-in-progress)
-5. ComBatLS (Work-in-progress)
+5. ComBatLS (Gardner et al., preprint)
 
 This package also includes the CovBat Family, which likewise extends the original CovBat methodology to enable flexible covariate modeling while removing batch effects in the mean and covariance of measurements.
 
