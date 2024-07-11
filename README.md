@@ -116,5 +116,5 @@ For ComBat-GAM, the Python implementation is available via https://github.com/rp
 
 > Pomponio, R., Erus, G., Habes, M., Doshi, J., Srinivasan, D., Mamourian, E., Bashyam, V., Nasrallah, I. M., Satterthwaite, T. D., Fan, Y., Launer, L. J., Masters, C. L., Maruff, P., Zhuo, C., Völzke, H., Johnson, S. C., Fripp, J., Koutsouleris, N., Wolf, D. H., … Shou, H., Davatzikos, C. (2020). Harmonization of large MRI datasets for the analysis of brain imaging patterns throughout the lifespan. *NeuroImage*, 208, 116450. https://doi.org/10.1016/j.neuroimage.2019.116450
 
-
-
+For ComBatLS, please refer the corresponding preprint:
+> Gardner, M., Shinohara, R. T., Bethlehem, R. A. I., Romero-Garcia, R., Warrier, V., Dorfschmidt, L., Shanmugan, S., Seidlitz, J., Alexander-Bloch, A., & Chen, A. (2024). ComBatLS: A location- and scale-preserving method for multi-site image harmonization. bioRxiv, 2024.06.21.599875. https://doi.org/10.1101/2024.06.21.599875
