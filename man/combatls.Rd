@@ -58,7 +58,7 @@ combatls(iris[,1:2], iris$Species, iris[3:4], y ~ Petal.Length + Petal.Width,
 
 }
 \references{
-Gardner et al. to be posted on biorxiv
+Gardner, M., Shinohara, R. T., Bethlehem, R. A. I., Romero-Garcia, R., Warrier, V., Dorfschmidt, L., Shanmugan, S., Seidlitz, J., Alexander-Bloch, A., & Chen, A. (2024). ComBatLS: A location- and scale-preserving method for multi-site image harmonization. bioRxiv, 2024.06.21.599875. https://doi.org/10.1101/2024.06.21.599875
 }
 \seealso{
 \link[ComBatFamily]{plot.comfam} for assessing regression fit via

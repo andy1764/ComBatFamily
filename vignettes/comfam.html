@@ -12,7 +12,7 @@
 
 <meta name="author" content="Andrew Chen" />
 
-<meta name="date" content="2023-10-20" />
+<meta name="date" content="2024-07-30" />
 
 <title>ComBat Family Overview</title>
 
@@ -340,15 +340,14 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">ComBat Family Overview</h1>
 <h4 class="author">Andrew Chen</h4>
-<h4 class="date">2023-10-20</h4>
+<h4 class="date">2024-07-30</h4>
 
 
 <div id="TOC">
 <ul>
 <li><a href="#combat" id="toc-combat">ComBat</a></li>
 <li><a href="#combat-gam" id="toc-combat-gam">ComBat-GAM</a></li>
-<li><a href="#combat-with-location-scale-models-combat-ls" id="toc-combat-with-location-scale-models-combat-ls">ComBat with
-location-scale models (ComBat-LS)</a></li>
+<li><a href="#combatls" id="toc-combatls">ComBatLS</a></li>
 <li><a href="#longitudinal-combat" id="toc-longitudinal-combat">Longitudinal ComBat</a></li>
 <li><a href="#references" id="toc-references">References</a></li>
 </ul>
@@ -420,23 +419,29 @@ using notation consistent with the <code>gam</code> function.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="fu">library</span>(mgcv)</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>cg <span class="ot">&lt;-</span> <span class="fu">comfam</span>(data, bat, covar, gam, <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> x2)</span></code></pre></div>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>cg <span class="ot">&lt;-</span> <span class="fu">combat_gam</span>(data, bat, covar, <span class="at">formula =</span> y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> x2)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># # alternate syntax</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># cg &lt;- comfam(data, bat, covar, gam, formula = y ~ s(x1) + x2)</span></span></code></pre></div>
 </div>
-<div id="combat-with-location-scale-models-combat-ls" class="section level2">
-<h2>ComBat with location-scale models (ComBat-LS)</h2>
-<p>ComBat Family supports modeling of covariate effects on the scale of
-measurements via GAMLSS, which is still experimental. Testing is
-ongoing, but ComBat-LS should be considered in settings with potential
-covariate effects on scale (e.g. age affecting the variance of imaging
-features).</p>
+<div id="combatls" class="section level2">
+<h2>ComBatLS</h2>
+<p>ComBatLS (Gardner et al.) is recent location- and scale-preserving
+method for multi-site image harmonization. ComBatLS models covariate
+effects in the location and scale of measurements via GAMLSS. ComBat-LS
+should be considered in settings with potential covariate effects on
+scale (e.g. age and sex affecting the variance of imaging features).</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">library</span>(gamlss)</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>)</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>cgl <span class="ot">&lt;-</span> <span class="fu">comfam</span>(data, bat, covar, gamlss, y <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>              <span class="at">sigma.formula =</span> <span class="sc">~</span> x1 <span class="sc">+</span> x2, </span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>              <span class="at">control =</span> <span class="fu">gamlss.control</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>))</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; Warning in RS(): Algorithm RS has not yet converged</span></span></code></pre></div>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>cgl <span class="ot">&lt;-</span> <span class="fu">combatls</span>(data, bat, covar, y <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>                <span class="at">sigma.formula =</span> <span class="sc">~</span> x1 <span class="sc">+</span> x2, </span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>                <span class="at">control =</span> <span class="fu">gamlss.control</span>(<span class="at">trace =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co"># # alternate syntax</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co"># cgl &lt;- comfam(data, bat, covar, gamlss, y ~ x1 + x2,</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#               sigma.formula = ~ x1 + x2, </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#               control = gamlss.control(trace = FALSE))</span></span></code></pre></div>
 </div>
 <div id="longitudinal-combat" class="section level2">
 <h2>Longitudinal ComBat</h2>
@@ -462,20 +467,15 @@ date.</p>
 <span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>covar <span class="ot">&lt;-</span> <span class="fu">cbind</span>(covar, <span class="at">ID =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>n, r))</span>
 <span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>r<span class="sc">*</span>p), n<span class="sc">*</span>r, p))</span>
 <span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>cf <span class="ot">&lt;-</span> <span class="fu">comfam</span>(data, bat, covar, lmer, y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> ID))</span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see help(&#39;isSingular&#39;)</span></span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see help(&#39;isSingular&#39;)</span></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see help(&#39;isSingular&#39;)</span></span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see help(&#39;isSingular&#39;)</span></span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">longCombat</span>(<span class="st">&quot;ID&quot;</span>, <span class="st">&quot;x1&quot;</span>, <span class="st">&quot;bat&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">&quot;x1 + x2&quot;</span>, <span class="st">&quot;(1 | ID)&quot;</span>,</span>
-<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>                <span class="at">data =</span> <span class="fu">cbind</span>(data, covar, bat), <span class="at">method =</span> <span class="st">&quot;MSR&quot;</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see help(&#39;isSingular&#39;)</span></span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see help(&#39;isSingular&#39;)</span></span>
-<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see help(&#39;isSingular&#39;)</span></span>
-<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see help(&#39;isSingular&#39;)</span></span>
-<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a></span>
-<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="fu">max</span>(cf<span class="sc">$</span>dat.combat <span class="sc">-</span> c<span class="sc">$</span>data_combat[,<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)])</span>
-<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt; [1] 4.171635e-09</span></span></code></pre></div>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>cf <span class="ot">&lt;-</span> <span class="fu">long_combat</span>(data, bat, covar, y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> ID))</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co"># # alternate syntax</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co"># cf &lt;- comfam(data, bat, covar, lmer, y ~ x1 + x2 + (1 | ID))</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">longCombat</span>(<span class="st">&quot;ID&quot;</span>, <span class="st">&quot;x1&quot;</span>, <span class="st">&quot;bat&quot;</span>, <span class="dv">1</span><span class="sc">:</span>p, <span class="st">&quot;x1 + x2&quot;</span>, <span class="st">&quot;(1 | ID)&quot;</span>,</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>                <span class="at">data =</span> <span class="fu">cbind</span>(data, covar, bat), <span class="at">method =</span> <span class="st">&quot;MSR&quot;</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="fu">max</span>(cf<span class="sc">$</span>dat.combat <span class="sc">-</span> c<span class="sc">$</span>data_combat[,<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)])</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; [1] 4.171635e-09</span></span></code></pre></div>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
