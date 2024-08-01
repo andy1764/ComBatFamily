@@ -53,7 +53,6 @@ Vignettes are provided for both the ComBat family `comfam` and the CovBat family
 ```
 devtools::install_github("jcbeer/longCombat")
 devtools::install_github("andy1764/CovBat_Harmonization/R")
-devtools::install_github("jfortin1/neuroCombatData")
 devtools::install_github("jfortin1/neuroCombat_Rpackage")
 ```
 
