@@ -51,15 +51,15 @@ library(ComBatFamily)
 Vignettes are provided for both the ComBat family `comfam` and the CovBat family `covfam`. To install with vignettes, first install the suggested dependencies via
 
 ```
-devtools::install_github("jcbeer/longCombat")
-devtools::install_github("andy1764/CovBat_Harmonization/R")
-devtools::install_github("jfortin1/neuroCombat_Rpackage")
+remotes::install_github("jcbeer/longCombat")
+remotes::install_github("andy1764/CovBat_Harmonization/R")
+remotes::install_github("jfortin1/neuroCombat_Rpackage")
 ```
 
 Then install the ComBatFamily package with vignettes via
 
 ```
-devtools::install_github("andy1764/ComBatFamily", build_vignettes = TRUE)
+remotes::install_github("andy1764/ComBatFamily", build_vignettes = TRUE)
 ```
 
 Vignettes can then be accessed through
