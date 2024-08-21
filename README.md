@@ -37,8 +37,8 @@ This package also includes the CovBat Family, which likewise extends the origina
 The R package can be installed via devtools by running the following code
 
 ```
-# install.packages("devtools")
-devtools::install_github("andy1764/ComBatFamily", build_vignettes = FALSE)
+# install.packages("remotes")
+remotes::install_github("andy1764/ComBatFamily")
 ```
 
 Then, you can load this package via
