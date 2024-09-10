@@ -105,7 +105,113 @@ covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 
   out <- list(dat.covbat = data_covbat, batch.info = batch_info,
               combat.out = com_out, pc.output = d_pc, n.pc = npc,
-              scores.combat = scores_com)
+              std.var = std.var, scores.combat = scores_com)
   class(out) <- c("covfam")
   out
+}
+
+#' Apply CovBat Harmonization to New Data
+#'
+#' Using parameters estimated via `covfam`, apply harmonization on new data.
+#' `predict.covfam` will estimate new batch adjustments if new batches are
+#' specified. For batches with existing estimates, the estimates from `object`
+#' are used. Harmonization targets are the same as `object` (e.g. `ref.batch`
+#' from `object` if specified). Models specifications are defined by the
+#' original `covfam` fit.
+#'
+#' @param object Object of class `covfam`, typically output of
+#'   \link[ComBatFamily]{covfam}
+#' @param newdata \emph{n x p} data frame or matrix of new observations where
+#'   \emph{p} is the number of features and \emph{n} is the number of subjects.
+#'   The features must match the original `data` used in `object`
+#' @param newbat Factor indicating new batch (often equivalent to site or scanner)
+#' @param newcovar Data frame or matrix of new covariates supplied to `model`.
+#'   Must contain all variables specified in the original `formula` used in
+#'   `object`.
+#' @param eb If \code{TRUE}, uses CovBat model with empirical Bayes for new batches
+#' @param robust.LS If \code{TRUE}, uses robust location and scale estimators
+#'   for new batch effect estimates Currently uses median and biweight
+#'   midvariance
+#' @param score.args List of arguments for score model
+#' @param ... Additional arguments to `predict` for the class of `model` (e.g.
+#'   `predict.lm` for CovBat)
+#'
+#' @return `predict.comfam` returns a list containing the following components:
+#' \item{dat.combat}{New harmonized data as a matrix with same dimensions as `newdata`}
+#' \item{batch.info}{New batch information, including reference batch if specified}
+#' \item{fits}{List of model fits from regression step, forwarded from `object`}
+#' \item{estimates}{List of estimates from standardization and batch effect correction, including new batches if relevant}
+#'
+#' @import stats
+#' @importFrom methods hasArg
+#' @export
+#'
+#' @examples
+#' cov_out <- covfam(iris[1:75,1:4], iris$Species[1:75])
+#'
+#' # out-of-sample with new batch
+#' out_pred <- predict(cov_out, iris[76:150,1:4], iris$Species[76:150])
+#'
+#' # in-sample
+#' in_pred <- predict(cov_out, iris[1:25,1:4], iris$Species[1:25])
+#' max(in_pred$dat.covbat - cov_out$dat.covbat[1:25,1:4])
+predict.covfam <- function(object, newdata, newbat, newcovar = NULL,
+                           robust.LS = FALSE, eb = TRUE, ...) {
+  n <- nrow(newdata)
+  p <- ncol(newdata)
+
+  if ((p == 1) & eb) {
+    warning("EB step skipped for univariate data.")
+    eb <- FALSE
+  }
+
+  # Specify robust location/scale estimators
+  if (robust.LS) {
+    loc <- median
+    scl <- .biweight_midvar
+  } else {
+    loc <- mean
+    scl <- var
+  }
+
+  com_out <- predict(object$combat.out, newdata, newbat, newcovar, robust.LS, eb)
+  com_res <- com_out$dat.combat - com_out$estimates$stand.mean
+
+  #### Adjust for multivariate batch effects via PCA ####
+  d_pc <- object$pc.output
+
+  # Adjust PCs specified in original fit
+  npc <- object$n.pc
+  scores <- predict(d_pc, com_res)
+
+  # ComBat without covariates to remove site effect in score mean/variance
+  # If score.model specified, fits that model instead
+  if (is.null(object$score.model)) {
+    scores_com <- predict(object$scores.combat, scores, newbat, eb = FALSE)
+  } else {
+    scores_com <- do.call(predict,
+                          c(list(object$scores.combat, newbat, newcovar,
+                                 eb = FALSE), score.args))
+  }
+  full_scores <- scores
+  full_scores[,1:npc] <- scores_com$dat.combat
+
+  #### Project scores back into observation space ####
+  if (object$std.var) {
+    data_covbat <- full_scores %*% t(d_pc$rotation) *
+      matrix(d_pc$scale, n, p, byrow = TRUE) +
+      matrix(d_pc$center, n, p, byrow = TRUE)
+  } else {
+    data_covbat <- full_scores %*% t(d_pc$rotation) +
+      matrix(d_pc$center, n, p, byrow = TRUE)
+  }
+
+  # Reintroduce covariate effects
+  data_covbat <- data_covbat + com_out$estimates$stand.mean
+
+  out <- object
+  out$dat.covbat <- data_covbat
+  out$combat.out <- com_out
+  out$scores.combat <- scores_com
+  return(out)
 }
