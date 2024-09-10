@@ -116,7 +116,7 @@ covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 #' `predict.covfam` will estimate new batch adjustments if new batches are
 #' specified. For batches with existing estimates, the estimates from `object`
 #' are used. Harmonization targets are the same as `object` (e.g. `ref.batch`
-#' from `object` if specified). Models specifications are defined by the
+#' from `object` if specified). Model specifications are defined by the
 #' original `covfam` fit.
 #'
 #' @param object Object of class `covfam`, typically output of
@@ -130,17 +130,18 @@ covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 #'   `object`.
 #' @param eb If \code{TRUE}, uses CovBat model with empirical Bayes for new batches
 #' @param robust.LS If \code{TRUE}, uses robust location and scale estimators
-#'   for new batch effect estimates Currently uses median and biweight
+#'   for new batch effect estimates. Currently uses median and biweight
 #'   midvariance
-#' @param score.args List of arguments for score model
+#' @param score.args List of arguments to `predict` for the class of `score.model`
 #' @param ... Additional arguments to `predict` for the class of `model` (e.g.
 #'   `predict.lm` for CovBat)
 #'
-#' @return `predict.comfam` returns a list containing the following components:
-#' \item{dat.combat}{New harmonized data as a matrix with same dimensions as `newdata`}
-#' \item{batch.info}{New batch information, including reference batch if specified}
-#' \item{fits}{List of model fits from regression step, forwarded from `object`}
-#' \item{estimates}{List of estimates from standardization and batch effect correction, including new batches if relevant}
+#' @return `predict.covfam` returns a list containing the following components:
+#' \item{batch.info}{Batch information, including reference batch if specified}
+#' \item{combat.out}{List output of \link[ComBatFamily]{comfam} from the ComBat step}
+#' \item{pc.output}{Output of `prcomp` from PCA step}
+#' \item{n.pc}{Numeric, number of PCs harmonized}
+#' \item{scores.com}{List output of \link[ComBatFamily]{comfam} from the CovBat step}
 #'
 #' @import stats
 #' @importFrom methods hasArg
@@ -156,7 +157,8 @@ covfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 #' in_pred <- predict(cov_out, iris[1:25,1:4], iris$Species[1:25])
 #' max(in_pred$dat.covbat - cov_out$dat.covbat[1:25,1:4])
 predict.covfam <- function(object, newdata, newbat, newcovar = NULL,
-                           robust.LS = FALSE, eb = TRUE, ...) {
+                           robust.LS = FALSE, eb = TRUE, score.args = NULL,
+                           ...) {
   n <- nrow(newdata)
   p <- ncol(newdata)
 

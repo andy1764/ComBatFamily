@@ -2,6 +2,7 @@
 
 S3method(plot,comfam)
 S3method(predict,comfam)
+S3method(predict,covfam)
 export(combat)
 export(combat_gam)
 export(combatls)
