@@ -1,5 +1,7 @@
 # ComBat Family of Harmonization Methods
 
+WARNING: This is the developmental branch of ComBatFamily, new functions and modified functions are still in testing.
+
 **Author**: Andrew A. Chen, chenandr@musc.edu 
 
 **Maintainers**:  
@@ -34,11 +36,11 @@ This package also includes the CovBat Family, which likewise extends the origina
 - Functions for evaluating batch effects before and after harmonization
 
 ## 1. Installation
-The R package can be installed via devtools by running the following code
+The developmental version can be installed via `remotes` by running the following code
 
 ```
 # install.packages("remotes")
-remotes::install_github("andy1764/ComBatFamily")
+remotes::install_github("andy1764/ComBatFamily@dev", force = TRUE)
 ```
 
 Then, you can load this package via
@@ -56,10 +58,10 @@ remotes::install_github("andy1764/CovBat_Harmonization/R")
 remotes::install_github("jfortin1/neuroCombat_Rpackage")
 ```
 
-Then install the ComBatFamily package with vignettes via
+Then install the developmental version with vignettes via
 
 ```
-remotes::install_github("andy1764/ComBatFamily", build_vignettes = TRUE)
+remotes::install_github("andy1764/ComBatFamily@dev", force = TRUE, build_vignettes = TRUE)
 ```
 
 Vignettes can then be accessed through
@@ -99,6 +101,19 @@ out_pred <- predict(com_out, iris[76:150,1:2], iris$Species[76:150])
 # in-sample
 in_pred <- predict(com_out, iris[1:25,1:2], iris$Species[1:25])
 max(in_pred$dat.combat - com_out$dat.combat[1:25,])
+```
+
+EXPERIMENTAL: We also include the `predict.covfam` function for applying `covfam` fits to new data. Our implementation utilizes the same model fits and PCA fit from the original `covfam` harmonization.
+
+```
+cov_out <- covfam(iris[1:75,1:4], iris$Species[1:75])
+
+# out-of-sample with new batch
+out_pred <- predict(cov_out, iris[76:150,1:4], iris$Species[76:150])
+
+# in-sample
+in_pred <- predict(cov_out, iris[1:25,1:4], iris$Species[1:25])
+max(in_pred$dat.covbat - cov_out$dat.covbat[1:25,1:4])
 ```
 
 We also provide a wrapper to access model fit diagnostic plots, `plot.comfam`. Other additional features are in active development.
