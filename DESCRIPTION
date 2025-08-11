@@ -11,4 +11,4 @@ VignetteBuilder: knitr
 Imports: methods, mgcv, gamlss, lme4
 Suggests: knitr, rmarkdown, CovBat, neuroCombat, longCombat
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2

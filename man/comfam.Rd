@@ -11,6 +11,7 @@ comfam(
   model = lm,
   formula = NULL,
   eb = TRUE,
+  ignore.na = FALSE,
   robust.LS = FALSE,
   ref.batch = NULL,
   ...
@@ -35,6 +36,10 @@ each feature}
 
 \item{eb}{If \code{TRUE}, uses ComBat model with empirical Bayes for mean
 and variance harmonization}
+
+\item{ignore.na}{VERY Experimental: If \code{TRUE}, drops NA in batch
+effect computations. Note that additional arguments to \code{model} are still
+necessary, such as \code{na.action = na.exclude} in \link[stats]{lm}}
 
 \item{robust.LS}{If \code{TRUE}, uses robust location and scale estimators
 for error variance and site effect parameters. Currently uses median and
