@@ -184,18 +184,18 @@ predict.covfam <- function(object, newdata, newbat, newcovar = NULL,
 
   # Adjust PCs specified in original fit
   npc <- object$n.pc
-  scores <- predict(d_pc, com_res)
+  full_scores <- predict(d_pc, com_res)
 
   # ComBat without covariates to remove site effect in score mean/variance
   # If score.model specified, fits that model instead
   if (is.null(object$score.model)) {
-    scores_com <- predict(object$scores.combat, scores, newbat, eb = FALSE)
+    scores_com <- predict(object$scores.combat, full_scores[,1:npc], newbat,
+                          eb = FALSE)
   } else {
     scores_com <- do.call(predict,
-                          c(list(object$scores.combat, newbat, newcovar,
-                                 eb = FALSE), score.args))
+                          c(list(object$scores.combat, full_scores[,1:npc],
+                                 newbat, newcovar, eb = FALSE), score.args))
   }
-  full_scores <- scores
   full_scores[,1:npc] <- scores_com$dat.combat
 
   #### Project scores back into observation space ####
