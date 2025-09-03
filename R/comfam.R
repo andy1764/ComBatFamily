@@ -52,20 +52,18 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
                    ref.batch = NULL, ...) {
   if (hasArg("family")) {
     if (list(...)$family$family[1] != "NO") {
-      warning("Families other than Gaussian are supported but experimental, output dataset will not necessarily be in the original space.")
+      warning("Families other than Gaussian are supported but experimental,
+              output dataset will not necessarily be in the original space.")
 
       warning("EB step will still assume Gaussian errors.")
     }
   }
-
   if(is.null(formula) && !(is.null(covar))) {
     warning("Covariates included but not controlled for, use the formula argument to control for covariates")
   }
-
   if(!(is.null(formula)) && is.null(covar)) {
     warning("Formula specified but covariates not included, covariate effects may not be preserved")
   }
-
   if (anyNA(data) && !(ignore.na)) {
     warning("NAs detected in data, consider setting the 'ignore.na' argument")
   }

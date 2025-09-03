@@ -90,8 +90,8 @@ combat <- function(data, bat, covar = NULL, formula = NULL,
 #' @references
 #' Pomponio, R., Erus, G., Habes, M., Doshi, J., Srinivasan, D., Mamourian, E., Bashyam, V., Nasrallah, I. M., Satterthwaite, T. D., Fan, Y., Launer, L. J., Masters, C. L., Maruff, P., Zhuo, C., Völzke, H., Johnson, S. C., Fripp, J., Koutsouleris, N., Wolf, D. H., … Shou, H., Davatzikos, C. (2020). Harmonization of large MRI datasets for the analysis of brain imaging patterns throughout the lifespan. *NeuroImage*, 208, 116450. https://doi.org/10.1016/j.neuroimage.2019.116450
 combat_gam <- function(data, bat, covar = NULL, formula = NULL,
-                       eb = TRUE, robust.LS = FALSE, ref.batch = NULL, ...) {
-  comfam(data, bat, covar, gam, formula, eb, robust.LS, ref.batch, ...)
+                       eb = TRUE, ignore.na = FALSE, robust.LS = FALSE, ref.batch = NULL, ...) {
+  comfam(data, bat, covar, gam, formula, eb, ignore.na, robust.LS, ref.batch, ...)
 }
 
 #' Longitudinal ComBat harmonization
@@ -138,8 +138,9 @@ combat_gam <- function(data, bat, covar = NULL, formula = NULL,
 #' @references
 #' Beer, J. C., Tustison, N. J., Cook, P. A., Davatzikos, C., Sheline, Y. I., Shinohara, R. T., & Linn, K. A. (2020). Longitudinal ComBat: A method for harmonizing longitudinal multi-scanner imaging data. *NeuroImage*, 220, 117129. https://doi.org/10.1016/j.neuroimage.2020.117129
 long_combat <- function(data, bat, covar = NULL, formula = NULL,
-                        eb = TRUE, robust.LS = FALSE, ref.batch = NULL, ...) {
-  comfam(data, bat, covar, lmer, formula, eb, robust.LS, ref.batch, ...)
+                        eb = TRUE, ignore.na = FALSE,
+                        robust.LS = FALSE, ref.batch = NULL, ...) {
+  comfam(data, bat, covar, lmer, formula, eb, ignore.na, robust.LS, ref.batch, ...)
 }
 
 #' ComBatLS: Location- and scale-preserving harmonization
@@ -187,8 +188,8 @@ long_combat <- function(data, bat, covar = NULL, formula = NULL,
 #' @references
 #' Gardner, M., Shinohara, R. T., Bethlehem, R. A. I., Romero-Garcia, R., Warrier, V., Dorfschmidt, L., Shanmugan, S., Seidlitz, J., Alexander-Bloch, A., & Chen, A. A. (2024). ComBatLS: A location- and scale-preserving method for multi-site image harmonization. bioRxiv, 2024.06.21.599875. https://doi.org/10.1101/2024.06.21.599875
 combatls <- function(data, bat, covar = NULL, formula = NULL,
-                     sigma.formula = ~ 1, eb = TRUE, robust.LS = FALSE,
-                     ref.batch = NULL, ...) {
-  comfam(data, bat, covar, gamlss, formula, eb, robust.LS, ref.batch,
+                     sigma.formula = ~ 1, eb = TRUE, ignore.na = FALSE,
+                     robust.LS = FALSE, ref.batch = NULL, ...) {
+  comfam(data, bat, covar, gamlss, formula, eb, ignore.na, robust.LS, ref.batch,
          sigma.formula = sigma.formula, family = NO(), ...)
 }
