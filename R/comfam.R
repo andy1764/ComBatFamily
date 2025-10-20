@@ -181,62 +181,54 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   if (eb) {
     gamma_star <- NULL
     delta_star <- NULL
-
+  
     for (i in 1:nlevels(bat)) {
       n_b <- n_batches[i]
-
+  
       # method of moments estimates
       g_bar <- mean(gamma_hat[i,])
       g_var <- var(gamma_hat[i,])
-
       d_bar <- mean(delta_hat[i,])
       d_var <- var(delta_hat[i,])
-
+  
       d_a <- (2 * d_var + d_bar^2)/d_var
       d_b <- (d_bar * d_var + d_bar^3)/d_var
-
+  
       # adjust within batch
       bdat <- data_stand[batches[[i]],]
       g_orig <- gamma_hat[i,]
       g_old  <- gamma_hat[i,]
       d_old  <- delta_hat[i,]
-
-      change_old <- 1
+  
       change <- 1
       count  <- 0
-      while(change > 10e-5){
-        g_new <- (n_b*g_var*g_orig + d_old*g_bar)/(n_b*g_var + d_old)
-
+      while (change > 1e-4 && count < 50) {
+        g_new <- (n_b * g_var * g_orig + d_old * g_bar) / (n_b * g_var + d_old)
+  
         if (robust.LS) {
-          sum2 <- (n_b-1) * sapply(1:p, function(v) {
-            .biweight_midvar(bdat[,v], g_new[v])})
+          sum2 <- (n_b - 1) * sapply(1:p, function(v) .biweight_midvar(bdat[, v], g_new[v]))
         } else {
-          sum2   <- colSums(sweep(bdat, 2, g_new)^2)
+          sum2 <- colSums(sweep(bdat, 2, g_new)^2)
         }
-
-        d_new <- (sum2/2 + d_b)/(n_b/2 + d_a - 1)
-
-        change <- max(abs(g_new - g_old)/g_old, abs(d_new - d_old)/d_old)
-
-        if (count > 30) {
-          if (change > change_old) {
-            warning("Empirical Bayes step failed to converge after 30 iterations,
-    	            using estimate before change between iterations increases.")
-            break
-          }
-        }
-
+  
+        d_new <- (sum2 / 2 + d_b) / (n_b / 2 + d_a - 1)
+  
+        change <- suppressWarnings(max(
+          c(abs(g_new - g_old)/ifelse(g_old == 0, 1e-8, g_old),
+            abs(d_new - d_old)/ifelse(d_old == 0, 1e-8, d_old)),
+          na.rm = TRUE
+        ))
+        if (is.na(change) || is.infinite(change)) change <- 0
+  
         g_old <- g_new
         d_old <- d_new
-
-        change_old <- change
-        count <- count+1
+        count <- count + 1
       }
-
+  
       gamma_star <- rbind(gamma_star, g_new)
       delta_star <- rbind(delta_star, d_new)
     }
-
+  
     rownames(gamma_star) <- rownames(gamma_hat)
     rownames(delta_star) <- rownames(delta_hat)
   } else {
