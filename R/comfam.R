@@ -138,19 +138,33 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
     pmod$batch[,which(levels(bat) == ref.batch)] <- 1
   }
 
-  stand_mean <- sapply(fits, predict, newdata = pmod, type = "response")
-  resid_mean <- sapply(fits, predict, newdata = mod, type = "response")
-
+  # --- handle gamm4 fits specially ---
+  predict_wrapper <- function(fit, newdata, ...) {
+    if (is.list(fit) && "gam" %in% names(fit)) {
+      # gamm4 fit
+      return(predict(fit$gam, newdata = newdata, type = "response", ...))
+    } else {
+      # lm, gam, lmer, etc.
+      return(predict(fit, newdata = newdata, type = "response", ...))
+    }
+  }
+  
+  # Use wrapper for both mean and residual predictions
+  stand_mean <- sapply(fits, predict_wrapper, newdata = pmod)
+  resid_mean <- sapply(fits, predict_wrapper, newdata = mod)
+  
+  # Compute pooled variance
   if (!is.null(ref.batch)) {
     var_pooled <- apply((data - resid_mean)[ref, , drop = FALSE], 2, scl) *
       (nref - 1)/nref
   } else {
     var_pooled <- apply(data - resid_mean, 2, scl) * (n - 1)/n
   }
-
+  
+  # Compute SD matrix
   if (hasArg("sigma.formula")) {
-    sd_mat <- sapply(fits, predict, newdata = pmod, what = "sigma",
-                     type = "response")
+    sd_mat <- sapply(fits, function(fit)
+      predict_wrapper(fit, newdata = pmod, what = "sigma"), simplify = TRUE)
   } else {
     sd_mat <- sapply(sqrt(var_pooled), rep, n)
   }
