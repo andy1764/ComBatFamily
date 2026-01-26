@@ -185,7 +185,7 @@ long_combat <- function(data, bat, covar = NULL, formula = NULL,
 #'   ~ Petal.Length)
 #'
 #' @references
-#' Gardner, M., Shinohara, R. T., Bethlehem, R. A. I., Romero-Garcia, R., Warrier, V., Dorfschmidt, L., Shanmugan, S., Seidlitz, J., Alexander-Bloch, A., & Chen, A. A. (2024). ComBatLS: A location- and scale-preserving method for multi-site image harmonization. bioRxiv, 2024.06.21.599875. https://doi.org/10.1101/2024.06.21.599875
+#' Gardner, M., Shinohara, R. T., Bethlehem, R. A., Romero‐Garcia, R., Warrier, V., Dorfschmidt, L., ... Alexander-Bloch, A. F. & Chen, A. A. (2025). ComBatLS: A Location‐and Scale‐Preserving Method for Multi‐Site Image Harmonization. *Human Brain Mapping*, 46(8), e70197. https://doi.org/10.1002/hbm.70197
 combatls <- function(data, bat, covar = NULL, formula = NULL,
                      sigma.formula = ~ 1, eb = TRUE, robust.LS = FALSE,
                      ref.batch = NULL, ...) {
