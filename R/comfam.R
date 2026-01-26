@@ -127,6 +127,26 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
     })
   }
 
+  #### Check gamlss convergence ####
+  gamlss_fits <- sapply(fits, function(fit) inherits(fit, "gamlss"))
+  if (any(gamlss_fits)) {
+    non_converged <- sapply(which(gamlss_fits), function(i) {
+      !isTRUE(fits[[i]]$converged)
+    })
+    if (any(non_converged)) {
+      failed_indices <- which(gamlss_fits)[non_converged]
+      feature_names <- colnames(data)
+      if (is.null(feature_names)) {
+        feature_names <- paste0("feature_", 1:p)
+      }
+      failed_features <- feature_names[failed_indices]
+      warning(paste("gamlss model did not converge for feature(s):",
+                    paste(failed_features, collapse = ", "),
+                    ". Results may be unreliable."))
+    }
+  }
+
+
   #### Standardize the data ####
   # Model matrix for obtaining pooled mean
   pmod <- mod
