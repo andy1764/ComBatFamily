@@ -6,8 +6,7 @@
 Andrew A. Chen, chenandr@musc.edu  
 Haochang Shou, hshou@pennmedicine.upenn.edu  
 Margaret Gardner, margaret.gardner@pennmedicine.upenn.edu  
-Zheng Ren, zheng.ren@pennmedicine.upenn.edu  
-Randa Melham, randa.melhem@pennmedicine.upenn.edu  
+Zheng Ren, zheng.ren@pennmedicine.upenn.edu
 
 **License**: Artistic License 2.0
 
@@ -27,7 +26,9 @@ ComBat Family methods include:
 
 This package also includes the CovBat Family, which likewise extends the original CovBat methodology to enable flexible covariate modeling while removing batch effects in the mean and covariance of measurements.
 
-**NOTE:** This package is still a work-in-progress and will be updated soon to include the following features:
+This package also includes ComBat-Predict, which provides an out-of-sample extension to any ComBat Family method. If you use this method, please cite Yao et al., 2026.
+
+**NOTE:** This package is still a work-in-progress and will be updated to include the following features:
 
 - Nonparametric Empirical Bayes step
 - Empirical Bayes step leveraging non-Gaussian data distributions
@@ -88,7 +89,7 @@ Note that non-Gaussian data distributions are supported by functions such as `gl
 ## 3. Additional features
 On top of unifying existing harmonization packages, we include additional features in this package.
 
-For out-of-sample harmonization, we provide `predict.comfam` to apply estimated harmonization to a specified sample. This function will estimate new batch adjustment parameters if needed, otherwise it will apply existing estimates. `predict.comfam` has been tested for linear models (`lm`) and generalized additive models (`gam`), but may give errors for other chosen models. Below is an example call:
+For out-of-sample harmonization, we provide ComBat-Predict (`predict.comfam`) to apply estimated harmonization to a new sample. This function will estimate new batch adjustment parameters if needed, otherwise it will apply existing estimates. `predict.comfam` has been validated for linear models (`lm`) and generalized additive models (`gam`) in Xin et al., 2026. It may give errors for other chosen models. Below is an example call:
 
 ```
 com_out <- comfam(iris[1:75,1:2], iris$Species[1:75])
@@ -126,3 +127,6 @@ For ComBat-GAM, the Python implementation is available via https://github.com/rp
 
 For ComBatLS, please cite the following paper:
 > Gardner, M., Shinohara, R. T., Bethlehem, R. A., Romero‐Garcia, R., Warrier, V., Dorfschmidt, L., ... Alexander-Bloch, A. F. & Chen, A. A. (2025). ComBatLS: A Location‐and Scale‐Preserving Method for Multi‐Site Image Harmonization. *Human Brain Mapping*, 46(8), e70197. https://doi.org/10.1002/hbm.70197
+
+For ComBat-Predict, please cite the following paper:
+> Xin, Y., Gardner, M., Tustison, N. J., Cook, P., Gee, J., Benitez, A., ... & Chen, A. A. (2026). ComBat‐Predict Enhances Generalizability of Neuroimaging Models to New Sites. Human Brain Mapping, 47(8), e70546.
