@@ -18,6 +18,9 @@
 #'   each feature
 #' @param eb If \code{TRUE}, uses ComBat model with empirical Bayes for mean
 #'   and variance harmonization
+#' @param ignore.na VERY Experimental: If \code{TRUE}, drops NA in batch
+#'   effect computations. Note that additional arguments to `model` are still
+#'   necessary, such as `na.action = na.exclude` in \link[stats]{lm}
 #' @param robust.LS If \code{TRUE}, uses robust location and scale estimators
 #'   for error variance and site effect parameters. Currently uses median and
 #'   biweight midvariance
@@ -45,7 +48,8 @@
 #' comfam(iris[,1:2], iris$Species)
 #' comfam(iris[,1:2], iris$Species, iris[3:4], lm, y ~ Petal.Length + Petal.Width)
 comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
-                   eb = TRUE, robust.LS = FALSE, ref.batch = NULL, ...) {
+                   eb = TRUE, ignore.na = FALSE, robust.LS = FALSE,
+                   ref.batch = NULL, ...) {
   if (hasArg("family")) {
     if (list(...)$family$family[1] != "NO") {
       warning("Families other than Gaussian are supported but experimental, output dataset will not necessarily be in the original space.")
@@ -62,6 +66,22 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
     warning("Formula specified but covariates not included, covariate effects may not be preserved")
   }
   
+      warning("Families other than Gaussian are supported but experimental,
+              output dataset will not necessarily be in the original space.")
+
+      warning("EB step will still assume Gaussian errors.")
+    }
+  }
+  if(is.null(formula) && !(is.null(covar))) {
+    warning("Covariates included but not controlled for, use the formula argument to control for covariates")
+  }
+  if(!(is.null(formula)) && is.null(covar)) {
+    warning("Formula specified but covariates not included, covariate effects may not be preserved")
+  }
+  if (anyNA(data) && !(ignore.na)) {
+    warning("NAs detected in data, consider setting the 'ignore.na' argument")
+  }
+
   # Data details and formatting
   data <- as.matrix(data)
   n <- nrow(data)
@@ -87,11 +107,11 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   
   # Specify robust location/scale estimators
   if (robust.LS) {
-    loc <- median
-    scl <- .biweight_midvar
+    loc <- function(x) median(x, na.rm = ignore.na)
+    scl <- function(x) .biweight_midvar(x, na.rm = ignore.na)
   } else {
-    loc <- mean
-    scl <- var
+    loc <- function(x) mean(x, na.rm = ignore.na)
+    scl <- function(x) var(x, na.rm = ignore.na)
   }
   
   #### Fit specified models ####
@@ -168,10 +188,14 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   }
   
   if (!is.null(ref.batch)) {
-    var_pooled <- apply((data - resid_mean)[ref, , drop = FALSE], 2, scl) *
-      (nref - 1)/nref
+    var_pooled <- apply(
+      (data - resid_mean)[ref, , drop = FALSE], 2, function(x) {
+        scl(x) * (sum(!(is.na(x)))-1)/sum(!(is.na(x)))
+      })
   } else {
-    var_pooled <- apply(data - resid_mean, 2, scl) * (n - 1)/n
+    var_pooled <- apply(data - resid_mean, 2, function(x) {
+      scl(x) * (sum(!(is.na(x)))-1)/sum(!(is.na(x)))
+    })
   }
   
   if (hasArg("sigma.formula")) {
@@ -223,7 +247,7 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
           sum2 <- (n_b-1) * sapply(1:p, function(v) {
             .biweight_midvar(bdat[,v], g_new[v])})
         } else {
-          sum2   <- colSums(sweep(bdat, 2, g_new)^2)
+          sum2 <- colSums(sweep(bdat, 2, g_new)^2, na.rm = ignore.na)
         }
         
         d_new <- (sum2/2 + d_b)/(n_b/2 + d_a - 1)
@@ -514,6 +538,46 @@ predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
   out
 }
 
+#' Deidentify ComBat Family Harmonization Fit
+#'
+#' Remove original data from `comfam` fit. The deidentified harmonization fit
+#' can then be shared with other sites for use in
+#' \link[ComBatFamily]{predict.comfam}.
+#'
+#' @param object Object of class `comfam`, typically output of
+#'   \link[ComBatFamily]{comfam}
+#'
+#' @return `deidentify.comfam` returns a list containing the following components:
+#' \item{batch.info}{New batch information, including reference batch if specified}
+#' \item{fits}{Deidentified list of model fits from regression step, forwarded from `object`}
+#' \item{estimates}{List of estimates from standardization and batch effect correction, including new batches if relevant}
+#'
+#' @export
+#'
+#' @examples
+#' com_out <- comfam(iris[1:75,1:2], iris$Species[1:75], iris[1:75,3:4], lm, y ~ Petal.Length + Petal.Width)
+#' com_deid <- deidentify(com_out)
+#'
+#' predict(com_deid, iris[76:150,1:2], iris$Species[76:150], iris[1:75,3:4])
+deidentify.comfam <- function(object) {
+  out <- object
+  out$dat.combat <- NULL
+  out$fits <- lapply(out$fits, function(x) {
+    x$model <- NULL
+    x$call$data <- NULL
+    x
+  })
+  return(out)
+}
+
+#' S3 Generic for Deidentification
+#'
+#' @param x A vector.
+#' @export
+deidentify <- function(x, ...) {
+  UseMethod("deidentify")
+}
+
 #' Plot Diagnostics for `comfam`
 #'
 #' Diagnostic plots for original model fits in `comfam`, leverages S3 plot
@@ -533,12 +597,16 @@ plot.comfam <- function(object, feature) {
   plot(object$fits[[feature]])
 }
 
-.biweight_midvar <- function(data, center=NULL, norm.unbiased = TRUE) {
+.biweight_midvar <- function(data, na.rm = FALSE, center = NULL, norm.unbiased = TRUE) {
   if (is.null(center)) {
-    center <- median(data)
+    center <- median(data, na.rm = na.rm)
   }
   
   mad <- median(abs(data - center))
+
+  if (na.rm) {data <- na.omit(data)}
+
+  mad <- median(abs(data - center), na.rm = na.rm)
   d <- data - center
   c <- ifelse(norm.unbiased, 9/qnorm(0.75), 9)
   u <- d/(c*mad)
